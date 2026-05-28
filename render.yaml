@@ -15,4 +15,4 @@ services:
 
 databases:
   - name: mc-production-planner-db
-    plan: starter
+    plan: basic-256mb
