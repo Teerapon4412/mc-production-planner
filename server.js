@@ -128,6 +128,16 @@ app.delete("/api/history/:id", async (req, res) => {
   res.json({ ok: true });
 });
 
+app.get("/api/master-records", async (_req, res) => {
+  res.json(await getValue("masterRecords", null));
+});
+
+app.put("/api/master-records", async (req, res) => {
+  const records = Array.isArray(req.body?.records) ? req.body.records : [];
+  await setValue("masterRecords", records);
+  res.json({ ok: true, count: records.length });
+});
+
 app.use(express.static(publicDir));
 app.get("*", (_req, res) => {
   res.sendFile(path.join(publicDir, "mc-production-planner.html"));

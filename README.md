@@ -34,6 +34,14 @@ create table if not exists planner_kv (
 - ถ้ารันในเครื่องโดยไม่มี database env ระบบจะ fallback ลงไฟล์ `app-data.json`
 - Browser ยังเก็บ localStorage ไว้เป็น cache เผื่อเน็ต/เซิร์ฟเวอร์หลุดชั่วคราว
 
+## แก้ไข Master Data
+
+เปิดแท็บ `Master Data` ในหน้าเว็บเพื่อเพิ่ม/แก้ไข/ลบข้อมูล MC master ได้โดยตรง
+
+- แก้ไขในตารางแล้วกด `บันทึก Master`
+- ข้อมูลจะถูกบันทึกลง Supabase ผ่าน API กลาง
+- เครื่องอื่น refresh หรือเปิดเว็บใหม่จะใช้ Master Data ล่าสุด
+
 ## รันในเครื่อง
 
 ```bash
