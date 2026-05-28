@@ -19,6 +19,27 @@ const pool = process.env.DATABASE_URL
       ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : undefined
     })
   : null;
+const supabaseUrl = process.env.SUPABASE_URL?.replace(/\/$/, "");
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+const hasSupabase = Boolean(supabaseUrl && supabaseKey);
+
+async function supabaseRequest(pathname, options = {}) {
+  const response = await fetch(`${supabaseUrl}/rest/v1/${pathname}`, {
+    ...options,
+    headers: {
+      apikey: supabaseKey,
+      authorization: `Bearer ${supabaseKey}`,
+      "content-type": "application/json",
+      ...(options.headers || {})
+    }
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Supabase request failed ${response.status}: ${text}`);
+  }
+  if (response.status === 204) return null;
+  return response.json();
+}
 
 async function initDb() {
   if (!pool) return;
@@ -48,6 +69,10 @@ async function getValue(key, fallback) {
     const result = await pool.query("select value from planner_kv where key = $1", [key]);
     return result.rows[0]?.value ?? fallback;
   }
+  if (hasSupabase) {
+    const rows = await supabaseRequest(`planner_kv?key=eq.${encodeURIComponent(key)}&select=value`);
+    return rows[0]?.value ?? fallback;
+  }
   const store = await readLocalStore();
   return store[key] ?? fallback;
 }
@@ -60,6 +85,14 @@ async function setValue(key, value) {
        on conflict (key) do update set value = excluded.value, updated_at = now()`,
       [key, JSON.stringify(value)]
     );
+    return;
+  }
+  if (hasSupabase) {
+    await supabaseRequest("planner_kv", {
+      method: "POST",
+      headers: { prefer: "resolution=merge-duplicates" },
+      body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
+    });
     return;
   }
   const store = await readLocalStore();
