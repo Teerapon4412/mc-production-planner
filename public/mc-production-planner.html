@@ -516,12 +516,13 @@
                 <th>End Time</th>
                 <th>Add-in Event</th>
                 <th>Time</th>
-                <th>Loss Time</th>
+                <th>Loss Time Event</th>
+                <th>Time</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody id="partRows">
-              <tr><td colspan="15">ยังไม่มีรายการที่สแกน</td></tr>
+              <tr><td colspan="16">ยังไม่มีรายการที่สแกน</td></tr>
             </tbody>
           </table>
         </div>
@@ -1133,6 +1134,7 @@
           endTime: plan.endTime || plannedEndText(plan, record),
           addInType: plan.addInType || '',
           addInMinutes: Math.max(0, Math.floor(Number(plan.addInMinutes) || 0)),
+          lossEvent: plan.lossEvent || '',
           lossMinutes: Math.max(0, Math.floor(Number(plan.lossMinutes) || 0)),
           qrValue: plan.qrValue,
           entityCode: plan.entityCode,
@@ -1145,7 +1147,7 @@
       const rows = Object.entries(planned);
 
       if (!rows.length) {
-        els.partRows.innerHTML = '<tr><td colspan="15">ยังไม่มีรายการที่สแกน</td></tr>';
+        els.partRows.innerHTML = '<tr><td colspan="16">ยังไม่มีรายการที่สแกน</td></tr>';
         renderPlanSummary();
         return;
       }
@@ -1180,6 +1182,7 @@
             </select>
           </td>
           <td><input class="add-in-min" type="number" min="0" step="1" value="${plan.addInMinutes || ''}" placeholder="0"></td>
+          <td><input class="loss-time-event" type="text" value="${esc(plan.lossEvent || '')}" placeholder="ระบุเหตุการณ์"></td>
           <td><input class="loss-time-min" type="number" min="0" step="1" value="${plan.lossMinutes || ''}" placeholder="0"></td>
           <td><button class="remove-row" type="button">ลบ</button></td>
         </tr>`;
@@ -1197,6 +1200,7 @@
       plan.startTime = row.querySelector('.part-time').value;
       plan.addInType = row.querySelector('.add-in-type').value;
       plan.addInMinutes = row.querySelector('.add-in-min').value.trim();
+      plan.lossEvent = row.querySelector('.loss-time-event').value.trim();
       plan.lossMinutes = row.querySelector('.loss-time-min').value.trim();
 
       if (target && target.classList.contains('part-end-time')) {
@@ -1305,10 +1309,11 @@
       }
 
       if (lossMinutes) {
+        const lossName = record.lossEvent || 'Loss Time';
         result.push({
           id: `${index}-loss`,
           type: 'loss',
-          name: `Loss Time | ${lossMinutes}m`,
+          name: `${lossName} | ${lossMinutes}m`,
           mc: record.mc,
           date: dateKey(start),
           startMin: cursorMin,
@@ -1318,7 +1323,7 @@
           endText: fmtMin(cursorMin + lossMinutes),
           meta: {
             ...record,
-            description: 'Loss Time',
+            description: lossName,
             cycleTime: '',
             planQuantity: '',
             isLossTime: true
