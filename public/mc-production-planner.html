@@ -803,18 +803,37 @@
     }
 
     function savePlannerState() {
+      const state = currentPlannerState();
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentPlannerState()));
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
       } catch (error) {
         console.warn('Cannot save planner state:', error);
       }
+      fetch('/api/state', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(state)
+      }).catch((error) => console.warn('Cannot save remote planner state:', error));
     }
 
-    function loadPlannerState() {
+    async function loadPlannerState() {
       try {
         applyPlannerState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
       } catch (error) {
         planned = {};
+      }
+
+      try {
+        const response = await fetch('/api/state');
+        if (response.ok) {
+          const remote = await response.json();
+          if (remote) {
+            applyPlannerState(remote);
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(remote));
+          }
+        }
+      } catch (error) {
+        console.warn('Cannot load remote planner state:', error);
       }
     }
 
@@ -1575,8 +1594,24 @@
       localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items));
     }
 
-    function renderHistoryOptions() {
-      const items = loadHistoryItems();
+    async function fetchHistoryItems() {
+      try {
+        const response = await fetch('/api/history');
+        if (response.ok) {
+          const remote = await response.json();
+          if (Array.isArray(remote)) {
+            saveHistoryItems(remote);
+            return remote;
+          }
+        }
+      } catch (error) {
+        console.warn('Cannot load remote history:', error);
+      }
+      return loadHistoryItems();
+    }
+
+    async function renderHistoryOptions() {
+      const items = await fetchHistoryItems();
 
       els.historySelect.innerHTML = items.length
         ? items.map((item) => `<option value="${esc(item.id)}">${esc(item.name)} (${esc(item.savedAtText)})</option>`).join('')
@@ -1589,7 +1624,7 @@
       return `Plan ${dateKey(now)} ${timeText(now)} / ${valid.length} jobs`;
     }
 
-    function saveCurrentToHistory() {
+    async function saveCurrentToHistory() {
       if (!Object.keys(planned).length) {
         alert('ยังไม่มีรายการให้บันทึก');
         return;
@@ -1610,16 +1645,25 @@
 
       items.unshift(item);
       saveHistoryItems(items.slice(0, 100));
-      renderHistoryOptions();
+      try {
+        await fetch('/api/history', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(item)
+        });
+      } catch (error) {
+        console.warn('Cannot save remote history:', error);
+      }
+      await renderHistoryOptions();
 
       els.historySelect.value = item.id;
       els.historyName.value = '';
       setScanStatus(`บันทึกประวัติแล้ว: ${name}`, 'ok');
     }
 
-    function loadSelectedHistory() {
+    async function loadSelectedHistory() {
       const id = els.historySelect.value;
-      const item = loadHistoryItems().find((history) => history.id === id);
+      const item = (await fetchHistoryItems()).find((history) => history.id === id);
 
       if (!item) {
         setScanStatus('ยังไม่ได้เลือกประวัติ', 'bad');
@@ -1638,17 +1682,22 @@
       setScanStatus(`โหลดประวัติแล้ว: ${item.name}`, 'ok');
     }
 
-    function deleteSelectedHistory() {
+    async function deleteSelectedHistory() {
       const id = els.historySelect.value;
       if (!id) return;
 
-      const items = loadHistoryItems();
+      const items = await fetchHistoryItems();
       const item = items.find((history) => history.id === id);
 
       if (!item || !confirm(`ลบประวัติ: ${item.name} ?`)) return;
 
       saveHistoryItems(items.filter((history) => history.id !== id));
-      renderHistoryOptions();
+      try {
+        await fetch(`/api/history/${encodeURIComponent(id)}`, { method: 'DELETE' });
+      } catch (error) {
+        console.warn('Cannot delete remote history:', error);
+      }
+      await renderHistoryOptions();
       setScanStatus('ลบประวัติแล้ว', 'ok');
     }
 
@@ -1754,8 +1803,8 @@
 
     async function init() {
       await loadMasterRecords();
-      loadPlannerState();
-      renderHistoryOptions();
+      await loadPlannerState();
+      await renderHistoryOptions();
       renderMasterRows();
       renderParts();
       buildHours();

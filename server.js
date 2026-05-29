@@ -88,7 +88,7 @@ async function setValue(key, value) {
     return;
   }
   if (hasSupabase) {
-    await supabaseRequest("planner_kv", {
+    await supabaseRequest("planner_kv?on_conflict=key", {
       method: "POST",
       headers: { prefer: "resolution=merge-duplicates" },
       body: JSON.stringify({ key, value, updated_at: new Date().toISOString() })
