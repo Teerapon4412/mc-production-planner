@@ -514,11 +514,13 @@
                 <th>Start Date</th>
                 <th>Start Time</th>
                 <th>End Time</th>
+                <th>Add-in Event</th>
+                <th>Add-in Min</th>
                 <th>Action</th>
               </tr>
             </thead>
             <tbody id="partRows">
-              <tr><td colspan="12">ยังไม่มีรายการที่สแกน</td></tr>
+              <tr><td colspan="14">ยังไม่มีรายการที่สแกน</td></tr>
             </tbody>
           </table>
         </div>
@@ -558,6 +560,7 @@
             <thead>
               <tr>
                 <th>Day</th>
+                <th>Type</th>
                 <th>MC</th>
                 <th>MMPT NO.</th>
                 <th>Part Name</th>
@@ -571,7 +574,7 @@
               </tr>
             </thead>
             <tbody id="detailRows">
-              <tr><td colspan="11">ยังไม่มี Timeline</td></tr>
+              <tr><td colspan="12">ยังไม่มี Timeline</td></tr>
             </tbody>
           </table>
         </div>
@@ -1127,6 +1130,9 @@
           startDate: plan.startDate,
           startTime: plan.startTime,
           endTime: plan.endTime || plannedEndText(plan, record),
+          addInType: plan.addInType || '',
+          addInName: plan.addInName || '',
+          addInMinutes: Math.max(0, Math.floor(Number(plan.addInMinutes) || 0)),
           qrValue: plan.qrValue,
           entityCode: plan.entityCode,
           entityName: plan.entityName
@@ -1138,7 +1144,7 @@
       const rows = Object.entries(planned);
 
       if (!rows.length) {
-        els.partRows.innerHTML = '<tr><td colspan="12">ยังไม่มีรายการที่สแกน</td></tr>';
+        els.partRows.innerHTML = '<tr><td colspan="14">ยังไม่มีรายการที่สแกน</td></tr>';
         renderPlanSummary();
         return;
       }
@@ -1164,6 +1170,17 @@
           <td><input class="part-date" type="date" value="${plan.startDate || els.defaultStartDate.value}"></td>
           <td><input class="part-time" type="time" value="${plan.startTime || els.defaultStartTime.value}"></td>
           <td><input class="part-end-time" type="time" value="${plan.endTime || plannedEndText(plan, record)}"></td>
+          <td>
+            <select class="add-in-type">
+              <option value="" ${!plan.addInType ? 'selected' : ''}>ไม่มี</option>
+              <option value="เปลี่ยน Mold" ${plan.addInType === 'เปลี่ยน Mold' ? 'selected' : ''}>เปลี่ยน Mold</option>
+              <option value="เปลี่ยน Insert" ${plan.addInType === 'เปลี่ยน Insert' ? 'selected' : ''}>เปลี่ยน Insert</option>
+              <option value="ซ่อมเครื่องจักร" ${plan.addInType === 'ซ่อมเครื่องจักร' ? 'selected' : ''}>ซ่อมเครื่องจักร</option>
+              <option value="อื่น ๆ" ${plan.addInType === 'อื่น ๆ' ? 'selected' : ''}>อื่น ๆ</option>
+            </select>
+            <input class="add-in-name" type="text" value="${esc(plan.addInName || '')}" placeholder="ระบุเหตุการณ์">
+          </td>
+          <td><input class="add-in-min" type="number" min="0" step="1" value="${plan.addInMinutes || ''}" placeholder="0"></td>
           <td><button class="remove-row" type="button">ลบ</button></td>
         </tr>`;
     }
@@ -1178,6 +1195,9 @@
       plan.quantity = row.querySelector('.qty-input').value.trim();
       plan.startDate = row.querySelector('.part-date').value;
       plan.startTime = row.querySelector('.part-time').value;
+      plan.addInType = row.querySelector('.add-in-type').value;
+      plan.addInName = row.querySelector('.add-in-name').value.trim();
+      plan.addInMinutes = row.querySelector('.add-in-min').value.trim();
 
       if (target && target.classList.contains('part-end-time')) {
         plan.endTime = target.value;
@@ -1217,15 +1237,15 @@
         return;
       }
 
-      tasks = plan.map(createTimelineTask).filter(Boolean);
+      tasks = plan.flatMap(createTimelineTasks).filter(Boolean);
       rebuildTimelineFilters();
       renderTimeline();
       switchView('timelineView');
     }
 
-    function createTimelineTask(record, index) {
+    function createTimelineTasks(record, index) {
       const start = parseDateTime(record.startTime, record.startDate);
-      if (!start) return null;
+      if (!start) return [];
 
       const startMin = start.getHours() * 60 + start.getMinutes();
       const autoDuration = Math.max(1, Math.ceil((record.cycleTime * record.planQuantity) / 60));
@@ -1240,9 +1260,9 @@
       }
 
       const durationMin = Math.max(1, endMin - startMin);
-
-      return {
-        id: index,
+      const productionTask = {
+        id: `${index}-production`,
+        type: 'production',
         name: `${record.description} | ${record.mmptNo} | ${record.planQuantity} pcs`,
         mc: record.mc,
         date: dateKey(start),
@@ -1253,6 +1273,34 @@
         endText: fmtMin(endMin),
         meta: record
       };
+      const eventMinutes = Math.max(0, Math.floor(Number(record.addInMinutes) || 0));
+
+      if (!eventMinutes) return [productionTask];
+
+      const eventName = record.addInType === 'อื่น ๆ'
+        ? (record.addInName || 'Add-in Event')
+        : (record.addInType || record.addInName || 'Add-in Event');
+      const eventRecord = {
+        ...record,
+        description: eventName,
+        cycleTime: '',
+        planQuantity: '',
+        isAddIn: true
+      };
+
+      return [productionTask, {
+        id: `${index}-addin`,
+        type: 'addin',
+        name: `${eventName} | ${eventMinutes}m`,
+        mc: record.mc,
+        date: dateKey(start),
+        startMin: endMin,
+        endMin: endMin + eventMinutes,
+        durationMin: eventMinutes,
+        startText: fmtMin(endMin),
+        endText: fmtMin(endMin + eventMinutes),
+        meta: eventRecord
+      }];
     }
 
     function rebuildTimelineFilters() {
@@ -1348,7 +1396,9 @@
     }
 
     function createTimelineBar(task) {
-      const style = styleFor(`${task.id}-${task.meta.mmptNo}-${task.startText}`);
+      const style = task.type === 'addin'
+        ? { start: '#64748b', end: '#334155', border: '#1f2937' }
+        : styleFor(`${task.id}-${task.meta.mmptNo}-${task.startText}`);
       const bar = document.createElement('div');
 
       bar.className = 'bar';
@@ -1358,7 +1408,7 @@
       bar.style.background = `linear-gradient(180deg, ${style.start}, ${style.end})`;
       bar.style.borderColor = style.border;
       bar.title = `${task.name}\n${task.mc}\n${task.startText}-${task.endText} (${task.durationMin}m)`;
-      bar.innerHTML = `<small>${esc(task.mc)}</small><span>${task.startText} ${esc(task.name)}</span>`;
+      bar.innerHTML = `<small>${task.type === 'addin' ? 'ADD' : esc(task.mc)}</small><span>${task.startText} ${esc(task.name)}</span>`;
 
       return bar;
     }
@@ -1386,7 +1436,7 @@
     function renderDetails(rows) {
       if (!rows.length) {
         detailExportRows = [];
-        els.detailRows.innerHTML = '<tr><td colspan="11">ยังไม่มี Timeline</td></tr>';
+        els.detailRows.innerHTML = '<tr><td colspan="12">ยังไม่มี Timeline</td></tr>';
         return;
       }
 
@@ -1398,6 +1448,7 @@
         .map((task) => `
           <tr>
             <td>${dayLabel(task.date)}</td>
+            <td>${task.type === 'addin' ? 'Add-in' : 'Production'}</td>
             <td>${esc(task.mc)}</td>
             <td>${esc(task.meta.mmptNo)}</td>
             <td>${esc(task.meta.description)}</td>
@@ -1418,9 +1469,10 @@
         return;
       }
 
-      const headers = ['Day', 'MC', 'MMPT NO.', 'Part Name', 'Start', 'End', 'Min', 'Cycle', 'Qty', 'Model', 'Package'];
+      const headers = ['Day', 'Type', 'MC', 'MMPT NO.', 'Part Name', 'Start', 'End', 'Min', 'Cycle', 'Qty', 'Model', 'Package'];
       const rows = detailExportRows.map((task) => [
         dayLabel(task.date),
+        task.type === 'addin' ? 'Add-in' : 'Production',
         task.mc,
         task.meta.mmptNo,
         task.meta.description,
