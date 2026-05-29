@@ -1,1733 +1,1647 @@
 ﻿<!doctype html>
 <html lang="th">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>MC Production Planner</title>
+
   <style>
-    :root { --bg:#f8fbff; --panel:#fff; --ink:#11284a; --muted:#64758d; --line:#dce5ef; --soft:#edf3f8; --blue:#075dbb; --navy:#07376f; --shadow:0 14px 35px rgba(17,40,74,.08); --axis:132px; --timeline:1680px; }
-    *{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#fbfdff 0%,var(--bg) 50%,#fff 100%);color:var(--ink);font-family:Arial,Tahoma,sans-serif} header{position:sticky;top:0;z-index:10;padding:18px 28px 14px;background:rgba(255,255,255,.96);border-bottom:1px solid var(--line);box-shadow:0 8px 24px rgba(17,40,74,.05)} h1{margin:0 0 12px;color:var(--navy);font-size:30px;text-transform:uppercase;letter-spacing:0}.toolbar,.tabs,.summary,.show-mc{display:flex;gap:10px;flex-wrap:wrap;align-items:end}.tabs{margin-bottom:12px}.field{display:grid;gap:4px} label{color:#526784;font-size:12px;font-weight:800;text-transform:uppercase} select,input,button{min-height:42px;font:inherit;border:1px solid #d5dee9;border-radius:7px;background:#fff;color:var(--ink);padding:8px 12px;box-shadow:0 2px 7px rgba(17,40,74,.04)} input[type=search]{min-width:300px}.scan-input{min-width:420px;font-size:18px;font-weight:800}.status{min-height:42px;display:flex;align-items:center;padding:8px 12px;border:1px solid var(--line);border-radius:7px;background:#fbfdff;color:var(--muted);font-weight:800}.status.ok{color:#166534;background:#f0fdf4;border-color:#bbf7d0}.status.bad{color:#991b1b;background:#fef2f2;border-color:#fecaca} button{cursor:pointer;font-weight:800;color:#18314f}.primary,.tab.active{background:linear-gradient(180deg,var(--blue),var(--navy));border-color:#062f66;color:#fff;box-shadow:0 8px 18px rgba(7,93,187,.22)} main{padding:18px 28px 30px}.view{display:none}.view.active{display:block}.panel{border:1px solid var(--line);border-radius:7px;background:var(--panel);box-shadow:var(--shadow);overflow:hidden}.panel-head{display:flex;gap:10px;flex-wrap:wrap;align-items:end;padding:12px;border-bottom:1px solid var(--line);background:#fbfdff}.table-wrap{overflow:auto;max-height:calc(100vh - 238px)} table{width:100%;border-collapse:collapse;font-size:13px}th,td{border-bottom:1px solid var(--soft);padding:9px 11px;text-align:left;white-space:nowrap}th{position:sticky;top:0;z-index:1;background:#eef5fc;color:#1d385c;font-weight:900}.job-check{min-height:0;width:16px;height:16px;margin:0;padding:0;box-shadow:none;accent-color:var(--blue)}.qty-input{min-height:34px;width:92px;padding:6px 8px;text-align:right}.hint,.summary{color:var(--muted);font-size:12px;font-weight:700}.chart-shell{border:1px solid var(--line);border-radius:7px;background:var(--panel);overflow:auto;max-height:calc(100vh - 260px);box-shadow:var(--shadow)}.axis-row,.day-row{display:grid;grid-template-columns:var(--axis) var(--timeline);min-width:calc(var(--axis) + var(--timeline))}.axis-row{position:sticky;top:0;z-index:4;height:46px;background:linear-gradient(180deg,#f7faff,#eaf1f9);border-bottom:1px solid var(--line)}.corner{position:sticky;left:0;z-index:5;display:grid;place-items:center;background:linear-gradient(180deg,var(--navy),#042d5e);border-right:1px solid #0b3e78;color:#fff;font-weight:900}.hours,.timeline{position:relative;background-image:linear-gradient(to right,rgba(17,40,74,.11) 1px,transparent 1px),linear-gradient(to right,rgba(17,40,74,.055) 1px,transparent 1px);background-size:calc(var(--timeline)/12) 100%,calc(var(--timeline)/24) 100%}.hour-label{position:absolute;top:15px;transform:translateX(-50%);color:#344761;font-size:13px;font-weight:900}.day-row{border-bottom:1px solid var(--line)}.day-label{position:sticky;left:0;z-index:3;display:grid;align-content:start;gap:5px;min-height:72px;padding:13px 12px 10px 28px;border-right:1px solid var(--line);background:#fbfdff}.day-label:before{content:"";position:absolute;top:19px;left:13px;width:8px;height:8px;border-radius:50%;background:#0871d7;box-shadow:0 0 0 3px rgba(8,113,215,.11)}.day-label strong{font-size:14px}.day-label span{color:var(--muted);font-size:12px;font-weight:700}.timeline{min-height:72px;background-color:rgba(255,255,255,.98)}.bar{position:absolute;display:grid;grid-template-columns:auto 1fr;align-items:center;gap:8px;height:32px;padding:0 11px;overflow:hidden;border:1px solid rgba(5,60,130,.5);border-radius:7px;color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 8px 14px rgba(7,93,187,.2);font-size:13px;font-weight:800;line-height:1;white-space:nowrap}.bar small{padding:4px 7px;border-radius:5px;background:rgba(255,255,255,.16);font-size:12px;font-weight:900}.bar span{overflow:hidden;text-overflow:ellipsis}.legend{display:flex;flex-wrap:wrap;gap:8px 18px;padding:14px 12px 0;color:#1f3656;font-size:14px;font-weight:800}.key{display:inline-flex;align-items:center;gap:6px}.swatch{width:18px;height:12px;border:1px solid rgba(5,60,130,.26);border-radius:3px}.empty{padding:24px;color:var(--muted);font-weight:800}@media(max-width:900px){header,main{padding-left:16px;padding-right:16px} input[type=search],select{min-width:0;width:100%}.table-wrap{max-height:none}}
+    /* =========================================================
+       1) Theme / Base
+       ========================================================= */
+    :root {
+      --bg: #f8fbff;
+      --panel: #ffffff;
+      --ink: #11284a;
+      --muted: #64758d;
+      --line: #dce5ef;
+      --soft: #edf3f8;
+      --blue: #075dbb;
+      --navy: #07376f;
+      --shadow: 0 14px 35px rgba(17, 40, 74, 0.08);
+      --axis: 132px;
+      --timeline: 1680px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      font-family: Arial, Tahoma, sans-serif;
+      background: linear-gradient(180deg, #fbfdff 0%, var(--bg) 50%, #ffffff 100%);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      color: var(--navy);
+      font-size: 30px;
+      letter-spacing: 0;
+      text-transform: uppercase;
+    }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      padding: 18px 28px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 24px rgba(17, 40, 74, 0.05);
+    }
+
+    main {
+      padding: 18px 28px 30px;
+    }
+
+    /* =========================================================
+       2) Common UI Components
+       ========================================================= */
+    .toolbar,
+    .tabs,
+    .summary,
+    .show-mc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .tabs {
+      margin-bottom: 12px;
+    }
+
+    .field {
+      display: grid;
+      gap: 4px;
+    }
+
+    label {
+      color: #526784;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    select,
+    input,
+    button {
+      min-height: 42px;
+      padding: 8px 12px;
+      color: var(--ink);
+      font: inherit;
+      border: 1px solid #d5dee9;
+      border-radius: 7px;
+      background: #ffffff;
+      box-shadow: 0 2px 7px rgba(17, 40, 74, 0.04);
+    }
+
+    input[type="search"] {
+      min-width: 300px;
+    }
+
+    button {
+      cursor: pointer;
+      color: #18314f;
+      font-weight: 800;
+    }
+
+    .primary,
+    .tab.active {
+      color: #ffffff;
+      border-color: #062f66;
+      background: linear-gradient(180deg, var(--blue), var(--navy));
+      box-shadow: 0 8px 18px rgba(7, 93, 187, 0.22);
+    }
+
+    .scan-input {
+      min-width: 420px;
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .status {
+      display: flex;
+      min-height: 42px;
+      align-items: center;
+      padding: 8px 12px;
+      color: var(--muted);
+      font-weight: 800;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fbfdff;
+    }
+
+    .status.ok {
+      color: #166534;
+      border-color: #bbf7d0;
+      background: #f0fdf4;
+    }
+
+    .status.bad {
+      color: #991b1b;
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .hint,
+    .summary {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    /* =========================================================
+       3) Panels / Tables
+       ========================================================= */
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .panel {
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .panel-head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: end;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .table-wrap {
+      max-height: calc(100vh - 238px);
+      overflow: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    th,
+    td {
+      padding: 9px 11px;
+      text-align: left;
+      white-space: nowrap;
+      border-bottom: 1px solid var(--soft);
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      color: #1d385c;
+      font-weight: 900;
+      background: #eef5fc;
+    }
+
+    .qty-input {
+      width: 92px;
+      min-height: 34px;
+      padding: 6px 8px;
+      text-align: right;
+    }
+
+    /* =========================================================
+       4) Timeline
+       ========================================================= */
+    .chart-shell {
+      max-height: calc(100vh - 260px);
+      overflow: auto;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: var(--panel);
+      box-shadow: var(--shadow);
+    }
+
+    .axis-row,
+    .day-row {
+      display: grid;
+      grid-template-columns: var(--axis) var(--timeline);
+      min-width: calc(var(--axis) + var(--timeline));
+    }
+
+    .axis-row {
+      position: sticky;
+      top: 0;
+      z-index: 4;
+      height: 46px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, #f7faff, #eaf1f9);
+    }
+
+    .corner {
+      position: sticky;
+      left: 0;
+      z-index: 5;
+      display: grid;
+      place-items: center;
+      color: #ffffff;
+      font-weight: 900;
+      border-right: 1px solid #0b3e78;
+      background: linear-gradient(180deg, var(--navy), #042d5e);
+    }
+
+    .hours,
+    .timeline {
+      position: relative;
+      background-image:
+        linear-gradient(to right, rgba(17, 40, 74, 0.11) 1px, transparent 1px),
+        linear-gradient(to right, rgba(17, 40, 74, 0.055) 1px, transparent 1px);
+      background-size:
+        calc(var(--timeline) / 12) 100%,
+        calc(var(--timeline) / 24) 100%;
+    }
+
+    .hour-label {
+      position: absolute;
+      top: 15px;
+      color: #344761;
+      font-size: 13px;
+      font-weight: 900;
+      transform: translateX(-50%);
+    }
+
+    .day-row {
+      border-bottom: 1px solid var(--line);
+    }
+
+    .day-label {
+      position: sticky;
+      left: 0;
+      z-index: 3;
+      display: grid;
+      align-content: start;
+      gap: 5px;
+      min-height: 72px;
+      padding: 13px 12px 10px 28px;
+      border-right: 1px solid var(--line);
+      background: #fbfdff;
+    }
+
+    .day-label::before {
+      content: "";
+      position: absolute;
+      top: 19px;
+      left: 13px;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #0871d7;
+      box-shadow: 0 0 0 3px rgba(8, 113, 215, 0.11);
+    }
+
+    .day-label strong {
+      font-size: 14px;
+    }
+
+    .day-label span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .timeline {
+      min-height: 72px;
+      background-color: rgba(255, 255, 255, 0.98);
+    }
+
+    .bar {
+      position: absolute;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      align-items: center;
+      gap: 8px;
+      height: 32px;
+      padding: 0 11px;
+      overflow: hidden;
+      color: #ffffff;
+      font-size: 13px;
+      font-weight: 800;
+      line-height: 1;
+      white-space: nowrap;
+      border: 1px solid rgba(5, 60, 130, 0.5);
+      border-radius: 7px;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.18),
+        0 8px 14px rgba(7, 93, 187, 0.2);
+    }
+
+    .bar small {
+      padding: 4px 7px;
+      font-size: 12px;
+      font-weight: 900;
+      border-radius: 5px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .bar span {
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 18px;
+      padding: 14px 12px 0;
+      color: #1f3656;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .key {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .swatch {
+      width: 18px;
+      height: 12px;
+      border: 1px solid rgba(5, 60, 130, 0.26);
+      border-radius: 3px;
+    }
+
+    .empty {
+      padding: 24px;
+      color: var(--muted);
+      font-weight: 800;
+    }
+
+    @media (max-width: 900px) {
+      header,
+      main {
+        padding-right: 16px;
+        padding-left: 16px;
+      }
+
+      input[type="search"],
+      select {
+        width: 100%;
+        min-width: 0;
+      }
+
+      .table-wrap {
+        max-height: none;
+      }
+    }
   </style>
 </head>
+
 <body>
-<header>
-  <h1>MC Production Planner</h1>
-  <div class="tabs"><button class="tab active" data-view="selectorView" type="button">เลือก Part</button><button class="tab" data-view="timelineView" type="button">Timeline</button><button class="tab" data-view="detailView" type="button">รายละเอียด</button><button class="tab" data-view="masterView" type="button">Master Data</button><button id="printPage" type="button">Print / PDF</button></div>
-  <div class="toolbar"><div class="field"><label for="dayFilter">Day</label><select id="dayFilter"></select></div><div class="field"><label for="mcTimelineFilter">MC</label><select id="mcTimelineFilter"></select></div><div class="field"><label for="timelineSearch">Work</label><input id="timelineSearch" type="search" placeholder="ค้นหาใน Timeline"></div><button class="primary" id="buildTimeline" type="button">สร้าง Timeline</button><button id="showAll" type="button">แสดงทั้งหมด</button><div class="summary"><span>งาน: <strong id="taskCount">0</strong></span><span>เวลารวม: <strong id="totalMinutes">0m</strong></span><span>งานยาวสุด: <strong id="longestTask">0m</strong></span></div></div>
-</header>
-<main>
-  <section class="view active" id="selectorView"><div class="panel"><div class="panel-head"><div class="field"><label for="scanInput">Scan Part Tag</label><input id="scanInput" class="scan-input" type="search" autocomplete="off" placeholder="สแกน Part Tag / QR แล้วกด Enter"></div><div class="field"><label for="defaultStartDate">วันที่เริ่มฉีดเริ่มต้น</label><input id="defaultStartDate" type="date" value="2026-04-01"></div><div class="field"><label for="defaultStartTime">เวลาเริ่มฉีดเริ่มต้น</label><input id="defaultStartTime" type="time" value="08:00"></div><button id="clearSelected" type="button">ล้างแผน</button><button class="primary" id="goTimeline" type="button">นำไปสร้าง Timeline</button><div id="scanStatus" class="status">พร้อมสแกน Part Tag</div><div class="hint">ระบบจะหา QR ใน mapping แล้วจับคู่กับ MC/Cycle time อัตโนมัติ ถ้า Part เดียวพบหลาย MC จะเพิ่มตัวเลือกทั้งหมดในแผน</div></div><div class="panel-head"><div class="field"><label for="historyName">ชื่อแผน</label><input id="historyName" type="text" placeholder="เช่น แผนเช้า MC 18"></div><button id="saveHistory" type="button">บันทึกประวัติ</button><div class="field"><label for="historySelect">เรียกดูย้อนหลัง</label><select id="historySelect"></select></div><button id="loadHistory" type="button">โหลดแผน</button><button id="deleteHistory" type="button">ลบประวัติ</button></div><div class="summary" id="planSummary"></div><div class="table-wrap"><table><thead><tr><th>MC</th><th>MMPT NO.</th><th>Description</th><th>Cycle</th><th>Model</th><th>Package</th><th>Std Qty</th><th>Plan Qty</th><th>Start Date</th><th>Start Time</th><th>End Time</th><th>Action</th></tr></thead><tbody id="partRows"><tr><td colspan="12">ยังไม่มีรายการที่สแกน</td></tr></tbody></table></div></div></section>
-  <section class="view" id="timelineView"><div class="show-mc" id="showMc"></div><div class="chart-shell"><div class="axis-row"><div class="corner">Day</div><div class="hours" id="hours"></div></div><div id="chart"><div class="empty">เลือก Part แล้วกดสร้าง Timeline</div></div></div><div class="legend" id="legend"></div></section>
-  <section class="view" id="detailView"><div class="panel"><div class="table-wrap"><table><thead><tr><th>Day</th><th>MC</th><th>MMPT NO.</th><th>Part Name</th><th>Start</th><th>End</th><th>Min</th><th>Cycle</th><th>Qty</th><th>Model</th><th>Package</th></tr></thead><tbody id="detailRows"><tr><td colspan="11">ยังไม่มี Timeline</td></tr></tbody></table></div></div></section>
-  <section class="view" id="masterView"><div class="panel"><div class="panel-head"><div class="field"><label for="masterSearch">Search</label><input id="masterSearch" type="search" placeholder="ค้นหา MC / MMPT / Description"></div><button class="primary" id="addMasterRow" type="button">เพิ่ม Master</button><button id="saveMasterRows" type="button">บันทึก Master</button><div class="status" id="masterStatus">Master พร้อมใช้งาน</div></div><div class="table-wrap"><table><thead><tr><th>MC</th><th>MMPT NO.</th><th>Description</th><th>Cycle</th><th>Model</th><th>Package</th><th>Std Qty</th><th>Action</th></tr></thead><tbody id="masterRows"></tbody></table></div></div></section>
-</main>
-<script type="text/plain" id="mcMasterRaw">
----------------- MC7 ---------------------------
-No.	MMPT NO.	Description	Cycle time PN	Model	Package	Quatity
-1	650080 , 650090	J97 U (LOWER) K701	85.8	97U	WIP	24
-2	650200 , 650210	U268U K701	85.2	97U	WIP	24
-3	WI6000000270	FRT S/D TR;  MAN / RH N052	58.6	RT50	WIP	15
-4	WN600000720	FRT S/D TR;  PWR / RH N052 ( No.2 )	57.0	RT50	WIP	15
-5	WN6000000730	FRT S/D TR;  PWR / RH U024 ( No.2 )	70.2	RT50	WIP	15
-6	WN6000002610	FRT S/D TR;  LWR RH U728 RF20	58.2	RF20	WIP	15
-7	WN6000002620	FRT S/D TR;  LWR RH N052 RF20	47.0	RF20	WIP	15
-8	WN6000000740	FRT S/D TR;  PWR / RH N052 ( No.1)	60.0	RT50	WIP	15
-9	WN6000002640	FRT S/D TR;  LWR LH N052 RF20	48.0	RF20	WIP	12
-10	WN6000003860	INST UPR Base,LH wo/fcw	66.1	RG01	WIP	30
-11	WN6000003870	INST UPR Base,LHw/fcw	65.8	RG01	HCI295	30
-12	WN6000004780	INST UPR BASE LH W/O FCW	73.3	RG01	HCI295	30
-13	WN6000004790	INST UPR BASE LH W/FCW	72.0	RG01	HCI295	30
-14	WN6000004110	INST UPR BASE RH W/FCW RG 04	67.0	RG04	HCI295	30
-15	WN6000004100	INST UPR BASE RH W/O RG 04	68.0	RG04	HCI295	30
-16	WN6000003920	INST UPR BASE RH W/FCW	67.0	RG01	WIP	30
-17	WN6000003280	INST UPR BASE RH WO/FCW	61.1	RG01	WIP	30
-18	WN6000002630	FRT S/D TR;  LWR LH U728 RF20	58.0	RF20	WIP	12
-19	WP6000007590	FRT UPR RH K701	48.7	RG01	WIP	20
-20	WP6000007600	FRT UPR LH K702	49.7	RG01	WIP	20
-21	WI6000000130	RR S/D TR;  PWR-RH N052	55.5	RT50	WIP	15
-22	WI6000000140	RR S/D TR;  PWR-LH N052	57.0	RT50	WIP	15
-25	WN6000003240	PANEL FRT S/D PWR UPR RH NO.2 RG01	48.7	RG01	WIP	20
-27	wi6000000290	FRT  MUNNUI  LH	58.0	RT50	WIP	15
-28	WN6000003890	PANEL INST UPR PAD LHD (SOFT)	44.5	RG01	WIP	30
-33	WN6000003910	RG01 PANEL INST UPR LHD (HARD)	42.6	RG01	WIP	30
-34	WN6000004880	UPR PAD LH RG 04	44.5	RG04	WIP	30
+  <header>
+    <h1>MC Production Planner</h1>
 
------------------------------ MC11 -------------------------------------
-No.	MMPT NO.	Description	Cycle time	Model	Package	Quatity
-1	688631	INST I190,UC510 RH 07 N743	84.0	I193	WIP	15
-2	609551	INST I190,UC510 LH 07 N743	87.6	I193	WIP	15
-3	617020	INST C190 RH N425	84.0	I193	WIP	15
-4	688621	INST C190 RH 07 U724	84.0	I193	WIP	15
-5	688591	INST C190 LH 07 U724	87.6	I193	WIP	15
-6	WI6000000040	INST 163 N602	72.0	I193	WIP	15
-7	607900	INST 165 K701	82.2	I165	WIP	15
-8	WN6000002510	INST;  RHD  , RT50 N052	56.4	RT50	WIP	8
-9	WI6000000460	INST;  LHD  , RT50 N052	55.0	RT50	WIP	8
-10	WI6000000500	INST;  RHD  , GMI700  970M	58.8	GMI	WIP	8
-11	WI6000000550	INST;  LHD , GMI700  970M	55.8	GMI	WIP	8
-12	WN6000001100	INST;  RHD  , GMI700 15MY  JB	58.8	GMI	WIP	8
-13	WN6000001110	INST;  LHD  , GMI700 15MY  JB	55.8	GMI	WIP	8
-14	WN6000002570	Panel INST  RHD RF20 N052	53.0	RF20	WIP	8
-15	WN6000002670	Panel INST  LHD RF20 N052	53.0	RF20	WIP	8
-16	FA60000027321	Panel IWR RH  RG01	49.0	RG01	HCI244	15
-17	612040	PANEL IP RH N311	84.0	I193	WIP	15
-18	WN6000003040	PANEL LWR RH RG01	51.7	RG01	HCI244	15
-19	WN6000003940	INST PANEL LWR BASE LHD RG01	49.7	RG01	HCI244	15
-20	FA60000051660	PANEL LWR RH RJ05 NCAP	51.7	RJ05 NCAP	HCI244	15
-21	FA6000028441	PANEL LWR RH RG04	51.7	RG04	HCI244	15
-22	FA6000049121	INST PANEL LWR BASE LHD RG10	49.7	RG01	HCI244	15
-23	FA60000051670	PANEL  LWR  LH  RG 01 NCAP	49.7	RG01	HCI244	15
-24	FA60000049161	PANEL  LWR  RH  RG 10	49.7	RG01	HCI244	15
-25	FA60000049111	PANEL  LWR  LH  RJ05 LH	49.7	RG01	HCI244	15
-26	FA60000037261	PANEL  LWR  LH  RG04 LH	49.7	RG04	HCI244	15
-27	FA60000049171	PANEL  LWR RH  RJ05 RH	49.7	RG01	HCI245	15
-28	FA60000051650	PANEL  LWR RH  RG10NCAP RH	49.7	RG01	HCI246	15
+    <div class="tabs">
+      <button class="tab active" data-view="selectorView" type="button">เลือก Part</button>
+      <button class="tab" data-view="timelineView" type="button">Timeline</button>
+      <button class="tab" data-view="detailView" type="button">รายละเอียด</button>
+      <button class="tab" data-view="masterView" type="button">Master Data</button>
+      <button id="printPage" type="button">Print / PDF</button>
+    </div>
 
------------------------- MC 16 ----------------------------------------------
-No.	MMPT NO.	Description	Cycle time	Model	Package	Quatity
-1	WN6000002660,50	FRT DOOR UPR  R/L RF20	51.0	RF20	WIP	40
-2	WK6000001570	Grille INR LWR RT93 (INJ)	51.0	RF20	HCI206	6
-3	WN6000004950	UPR PAD RH RJ01	48.0	RG01	HCI295	30
-4	FA6000004920	I/P SI TR	55.3	700P	HCI196	6
-5	WN6000004880	UPR PAD LH RG 04	44.3	RG04	HCI295	30
-6	WN6000003260	FRT LWR RH (RG01) K701	42.1	RG01	HCI305	15
-7	WN6000003270	FRT LWR LH (RG01) K701	42.7	RG01	HCI306	15
-9	WN6000003300	Panel inst UPR (Soft Type)	39.0	RG01	HCI295	30
-10	WN6000003321	INST UPR (Hard),RHD K701	46.0	RG01	HCI295	30
-11	WN6000003890	UPR  SOFT   LH	39.0	RG01	HCI295	30
-12	WN6000004870	INST UPR PAD RHD K701(RG04)	41.3	RG01	HCI295	30
-13	WN6000003050	Grilie upr RG01	49.0	RG01	Hci 294	10
-14	WN6000004290	UPR HARD  LH W/O PAB	42.0	RG01	HCI295	30
-15	WN6000003910	UPR HARD LH RG01	44.0	RG01	HCI295	30
-16	WN6000004960	UPR  SOFT   LH  RJ01	40.0	RG01	HCI295	30
-17	WN6000003301	Panel inst UPR (Soft Type)	42.0	RG01	HCI295	30
-18	FN6000001320/1330	Guide Air FRT BPR; RH/LH  RJ08	54.0	RJ08	HCI153	5
-19	WN6000003980	Grille Soft Nose Support;  RG04	44.0	RG04	HCI333	5
-20	WN6000005990	Grille Radiator Cover;  RJ08	52.0	RJ08	PK230084	10
-21	WN6000006730/6740	Protector ASM Blister Fender;  RH/LH VC67	57.0	RG21	HCI488	3
-22	FA60000041372	SOFT NOFT RG04	54.3	RG04	HCI333	5
-23	WS6000000440	Grille Rad RJ08	56.9	RJ08	HCI334	10
+    <div class="toolbar">
+      <div class="field">
+        <label for="dayFilter">Day</label>
+        <select id="dayFilter"></select>
+      </div>
 
-------------------------------------- MC 18 -------------------------------------
-No.	MMPT NO.	Description	Cycle time	Model	Package	Quatity
-1	WI6000000270	FRT S/D TR;  MAN / RH N052	57.0	RT50	WIP	15
-2	WI6000000290	FRT S/D TR;  MAN / LH N052	57.0	RT50	WIP	15
-5	WP6000008060	RR RJ 01 RH	50.0	GMI	WIP	12
-6	WP6000008050	RR RJ 01 LH	55.0	GMI	WIP	12
-7	WN6000000720	FRT S/D TR;  PWR / RH N052 ( No.2 )	57.0	RT50	WIP	15
-8	WN6000003060-3070	UPR RR RG01	58.2	RT50	WIP	15
-9	WN6000000450	Panel Tailgate TR (RF10)	62.0	RF10	WIP	15
-10	WN6000004760	TRIM TAIL GATE LWR RJ01	56.3	RG01	WIP	15
-11	WN6000000740	FRT S/D TR;  PWR / LH N052  ( No.2 )	58.2	RT50	WIP	15
-12	WN6000002610	FRT S/D TR;  LWR RH U728 RF20	52.2	RF20	WIP	12
-13	WN6000002620	FRT S/D TR;  LWR RH N052 RF20	52.2	RF20	WIP	12
-14	WN6000002630	FRT S/D TR;  LWR LH U728 RF20	52.2	RF20	WIP	12
-15	WN6000002640	FRT S/D TR;  LWR LH N052 RF20	52.2	RF20	WIP	12
-16	WP6000007650	FRT  MAN,RH (Grain G289)K701	53.0	RG01	WIP	15
-17	WP6000007660	FRT  MAN,LH  (Grain G289)K701	52.0	RG01	WIP	15
-18	WN6000003260-3270	FRT S/D TR; LWR / LH/RH RG ( No.2)	49.7	RG01	WIP	15
-19	WN6000004710	PANEL RR S/D TRRH RJ01	44.3	RG01	WIP	15
-20	WN6000004720	PANEL RR S/D TR LH RJ01	45.7	RG01	WIP	15
-21	WP6000010560	Grille FRT BMPR Fascia INR Wide;  RG14	57.8	RG14	WIP	18
-22	WP6000010570	Grille FRT BMPR Fascia INR Narrow;  RG14	57.0	RG14	WIP	18
-23	WP6000012090	Grille FRT BMPR Fascia INR Wide;  RG21	52.5	RG21	WIP	18
-24	WP6000012130	Grille FRT BMPR Fascia INR Narrow;  RG21	53.9	RG21	WIP	18
-25	FA60000036760	Trim Tail Gate LWR RJ01	56.6	RG01	WIP	10
+      <div class="field">
+        <label for="mcTimelineFilter">MC</label>
+        <select id="mcTimelineFilter"></select>
+      </div>
 
------------------------------------ MC 19 ------------------------------------------------
-No.	MMPT NO.	Description	Cycle time	Model	Package	Quatity
-1	WI6000000290	FRT S/D TR;  MAN / LH N052	58.5	RT50	WIP	15
-2	FA60010020/10030	Guard Fender Lwe RH/LH	66.0	GMI	FG	12
-3	WN6000001860	Panel LWR LHD INJ (Jet Black)	75.0	GMI	WIP	12
-4	WN6000000720	FRT S/D TR;  PWR / RH N052  ( No.1 )	58.2	RT50	WIP	15
-5	WN6000000740	FRT S/D TR;  PWR / LH N052  ( No.2 )	56.0	RT50	WIP	15
-6	WN6000002610	FRT S/D TR;  LWR RH U728 RF20	49.8	RF20	WIP	12
-7	WN6000002620	FRT S/D TR;  LWR RH N052 RF20	49.8	RF20	WIP	12
-8	WN6000002630	FRT S/D TR;  LWR LH U728 RF20	49.8	RF20	WIP	12
-9	WN6000002640	FRT S/D TR;  LWR LH N052 RF20	49.8	RF20	WIP	12
-10	WN6000002730	RR  LWR;  RH (RF20)  N052	60.0	RF20	WIP	15
-11	WN6000002720	RR  LWR;  RH (RF20)  U728	60.0	RF20	WIP	15
-12	FN6000000560	Grille 4X Black K701	69.0	VF75	HCI237	12
-13	WN6000002870	RR LWR LH (RT93) N052	52.8	RT50	WIP	15
-14	WN6000003820	Grille 4X Grey N756	69.0	VF75	HCI237	12
-15	WN6000003690	UPR Base RH Grade W/O (SRS)	58.7	RG01	HCI295	30
-16	WN6000003680	UPR Base RH Grade W/FCW  (SRS)	59.8	RG01	HCI295	30
-17	WN600004960	PAD RJ LH 01	45.8	RJ01	HCI296	30
-18	WN6000003321	INST UPR (Hard),RHD K701	41.8	RG01	HCI295	30
-19	WN6000002750	RR LWR LH (RF20) N052	60.0	RF20	WIP	15
-20	WP6000007590	FRT UPR RH K701	41.4	RG01	WIP	20
-21	WP6000007600	FRT UPR LH K701	44.7	RG01	WIP	20
-22	WN6000002740	RR  LWR;  LH (RF20)  U728	60.0	RF20	WIP	15
-23	WN6000003840	UPR BASE  LH  GRADE  W/FCW	65.0	RG01	HCI295	30
-24	WN6000003850	UPR BASE  LH  GRADE  W/O FCW	58.5	RG01	HCI295	30
-25	WN6000000750	FRT S/D TR;  PWR / LH U724  ( No.2 )	56.0	RF20	WIP	15
-26	WN6000004061/4071	RR S/D UPR RH/LH RG04 BLACK K701	50.5	RG01	WIP	30
-27	WN6000004270	UPR Base RH Grade W/O (SRS)Airbag	62.0	RG01	HCI295	30
-28	WN6000004280	UPR BASE  LH  GRADE  W/O FCW	58.0	RG01	HCI295	30
-29	FN6000000540	Grille Radiator VF-75 (4X) (Color N756)	69.0	VF75	HCI237	12
-30	WN6000003301	PANEL INST UPR PAD RHD (SOFT)	43.2	RG01	HCI295	30
-31	WN6000003280	UPR Base RH  W/O RG01	69.0	RG01	HCI295	30
-32	WN6000004780	UPR Base LH  W/O RG04	68.0	RG04	HCI295	30
-33	WN6000003920	INST UPR BASE RH W/FCW	67.0	RG01	HCI295	30
-34	WN6000005601/5591	Spoiler Side Cover OTR; RH/LH	72.3	RG14		6
-35	WN6000005610/5620	Spoiler Side Cover INNER ; RH/LH	72.7	RG14		6
-36	wN600004100	Base  RH RG04 W/O	66.4	RG01	HCI295	30
-37	WN600004110	Base  RH RG04 W/FCW	66.4	RG01	HCI295	30
-38	WN600004950	PAD RJ RH 01	43.0	RJ01	HCI296	30
-39	WN600004870	PAD RG  RH 04	39.3	RG04	HCI295	30
-40	WN6000005770/5760	Extender Lower Cover; RH/LH RG14	70.3	RG14	PK230020	40
-41	WN6000005740/5750	Extender  UPR  Cover; RH/LH RG14	70.3	RG14	PK230020	40
-</script>
-<script type="application/json" id="qrMappingRaw">{
-  "exportedAt": "2026-04-01T09:30:04.588Z",
-  "mappings": [
-    {
-      "qrValue": "609551",
-      "entityType": "PART",
-      "entityId": "1",
-      "entityCode": "609551",
-      "entityName": "INST I190, LH 07 N743",
-      "isActive": true
-    },
-    {
-      "qrValue": "610200",
-      "entityType": "PART",
-      "entityId": "2",
-      "entityCode": "610200",
-      "entityName": "AAT bumper 97 U 268",
-      "isActive": true
-    },
-    {
-      "qrValue": "650080",
-      "entityType": "PART",
-      "entityId": "3",
-      "entityCode": "650080",
-      "entityName": "AAT bumper 97 U LWR",
-      "isActive": true
-    },
-    {
-      "qrValue": "688631",
-      "entityType": "PART",
-      "entityId": "4",
-      "entityCode": "688631",
-      "entityName": "INST I190, RH 07 N743",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000004920",
-      "entityType": "PART",
-      "entityId": "5",
-      "entityCode": "FA6000004920",
-      "entityName": "I/P SI TR",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000010020",
-      "entityType": "PART",
-      "entityId": "6",
-      "entityCode": "FA6000010020",
-      "entityName": "Guard ASM Fender LWR;  RH Mat Color (Grain G120) Black  K710",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000010030",
-      "entityType": "PART",
-      "entityId": "7",
-      "entityCode": "FA6000010030",
-      "entityName": "Guard ASM Fender LWR;  LH Mat Color (Grain G120) Black  K710",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000028441",
-      "entityType": "PART",
-      "entityId": "8",
-      "entityCode": "FA6000028441",
-      "entityName": "Panel  INST LWR;  (RG04) RHD, HI Grade",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000036760",
-      "entityType": "PART",
-      "entityId": "9",
-      "entityCode": "FA6000036760",
-      "entityName": "Trim ASM Tailgate LWR ;  (RJ01)",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000036941",
-      "entityType": "PART",
-      "entityId": "10",
-      "entityCode": "FA6000036941",
-      "entityName": "Panel ASM INST LWR CTR;  RHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000037261",
-      "entityType": "PART",
-      "entityId": "11",
-      "entityCode": "FA6000037261",
-      "entityName": "Panel INST LWR;  (RG04) LHD, HI Grade",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000041372",
-      "entityType": "PART",
-      "entityId": "12",
-      "entityCode": "FA6000041372",
-      "entityName": "Grille ASM Soft Nose Support;",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000046770",
-      "entityType": "PART",
-      "entityId": "13",
-      "entityCode": "FA6000046770",
-      "entityName": "Panel ASM INST LWR CTR;  LHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000049111",
-      "entityType": "PART",
-      "entityId": "14",
-      "entityCode": "FA6000049111",
-      "entityName": "Panel INST LWR;  (RJ05) LHD, HI-Greade (Cup Holder W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000049121",
-      "entityType": "PART",
-      "entityId": "15",
-      "entityCode": "FA6000049121",
-      "entityName": "Panel INST LWR;  RG10 LHD, HI-Grade, Cup HLDR W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000049161",
-      "entityType": "PART",
-      "entityId": "16",
-      "entityCode": "FA6000049161",
-      "entityName": "Panel INST LWR;  RG10 RHD, HI-Grade, Cup HLDR W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000049171",
-      "entityType": "PART",
-      "entityId": "17",
-      "entityCode": "FA6000049171",
-      "entityName": "Panel INST LWR;  (RJ05) RHD, HI-Greade (Cup Holder W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000051650",
-      "entityType": "PART",
-      "entityId": "18",
-      "entityCode": "FA6000051650",
-      "entityName": "Panel INST LWR;  RG10 NCAP RHD, HI-Grade, Cup HLDR NCAP  W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000051660",
-      "entityType": "PART",
-      "entityId": "19",
-      "entityCode": "FA6000051660",
-      "entityName": "INST LWR;  RJ05 NCAP RHD, Hi-Grade, W/O Sound Block ,Cup Holder NCAP",
-      "isActive": true
-    },
-    {
-      "qrValue": "FA6000051670",
-      "entityType": "PART",
-      "entityId": "20",
-      "entityCode": "FA6000051670",
-      "entityName": "Panel  INST LWR;  RG10 NCAP LHD, HI-Grade, Cup HLDR NCAP  W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "FK6000006480",
-      "entityType": "PART",
-      "entityId": "21",
-      "entityCode": "FK6000006480",
-      "entityName": "Bumper Side; RH VC67 (INJ), KIJI K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "FK6000006490",
-      "entityType": "PART",
-      "entityId": "22",
-      "entityCode": "FK6000006490",
-      "entityName": "Bumper Side; LH VC67 (INJ), KIJI K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000000560",
-      "entityType": "PART",
-      "entityId": "23",
-      "entityCode": "FN6000000560",
-      "entityName": "Grille 4X Black K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001280",
-      "entityType": "PART",
-      "entityId": "24",
-      "entityCode": "FN6000001280",
-      "entityName": "MOLDING FRT BPR RJ08 RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001290",
-      "entityType": "PART",
-      "entityId": "25",
-      "entityCode": "FN6000001290",
-      "entityName": "MOLDING FRT BPR RJ08 LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001320",
-      "entityType": "PART",
-      "entityId": "26",
-      "entityCode": "FN6000001320",
-      "entityName": "Guide Air FRT BPR;  RH RJ08",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001330",
-      "entityType": "PART",
-      "entityId": "27",
-      "entityCode": "FN6000001330",
-      "entityName": "Guide Air FRT BPR;  LH RJ08",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001630",
-      "entityType": "PART",
-      "entityId": "28",
-      "entityCode": "FN6000001630",
-      "entityName": "Cover FRT BPR Fascia OPG Wide;  RH RG21 W/Fog",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001640",
-      "entityType": "PART",
-      "entityId": "29",
-      "entityCode": "FN6000001640",
-      "entityName": "Cover FRT BPR Fascia OPG Wide;  RH RG21 W/Fog",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001650",
-      "entityType": "PART",
-      "entityId": "30",
-      "entityCode": "FN6000001650",
-      "entityName": "Cover FRT BPR OPG Wide; RH  RG21 W/O Fog, (Grain G121)  Color Black K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "FN6000001660",
-      "entityType": "PART",
-      "entityId": "31",
-      "entityCode": "FN6000001660",
-      "entityName": "Cover FRT BPR  OPG Wide; LH  RG21 W/O Fog, (Grain G121)  Color Black K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "FP6000004210",
-      "entityType": "PART",
-      "entityId": "32",
-      "entityCode": "FP6000004210",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  RH RG21 W/O Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "FP6000004220",
-      "entityType": "PART",
-      "entityId": "33",
-      "entityCode": "FP6000004220",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  LH RG21 W/O Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "FP6000004230",
-      "entityType": "PART",
-      "entityId": "34",
-      "entityCode": "FP6000004230",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  RH RG21 W/O Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "FP6000004240",
-      "entityType": "PART",
-      "entityId": "35",
-      "entityCode": "FP6000004240",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  LH RG21 W/Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "FS6000000070",
-      "entityType": "PART",
-      "entityId": "36",
-      "entityCode": "FS6000000070",
-      "entityName": "MOLDING FRT BPR RJ08 RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "FS6000000080",
-      "entityType": "PART",
-      "entityId": "37",
-      "entityCode": "FS6000000080",
-      "entityName": "MOLDING FRT BPR RJ08 LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WA6000000510",
-      "entityType": "PART",
-      "entityId": "38",
-      "entityCode": "WA6000000510",
-      "entityName": "Lid Box;  RHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WA6000000520",
-      "entityType": "PART",
-      "entityId": "39",
-      "entityCode": "WA6000000520",
-      "entityName": "Lid Box;  LHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000130",
-      "entityType": "PART",
-      "entityId": "40",
-      "entityCode": "WI6000000130",
-      "entityName": "RR Door RT-50, RH  N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000140",
-      "entityType": "PART",
-      "entityId": "41",
-      "entityCode": "WI6000000140",
-      "entityName": "RR Door RT-50, LH  N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000270",
-      "entityType": "PART",
-      "entityId": "42",
-      "entityCode": "WI6000000270",
-      "entityName": "FRT S/D TR;  MAN / RH N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000290",
-      "entityType": "PART",
-      "entityId": "43",
-      "entityCode": "WI6000000290",
-      "entityName": "FRT S/D TR;  MAN / RH N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000460",
-      "entityType": "PART",
-      "entityId": "44",
-      "entityCode": "WI6000000460",
-      "entityName": "INST;  LHD  , RT50 N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000560",
-      "entityType": "PART",
-      "entityId": "45",
-      "entityCode": "WI6000000560",
-      "entityName": "Cover IP ASST: W/O PAB LHD  (N052)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WI6000000570",
-      "entityType": "PART",
-      "entityId": "46",
-      "entityCode": "WI6000000570",
-      "entityName": "Cover IP ASST: W/O PAB RHD  (N052)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002080",
-      "entityType": "PART",
-      "entityId": "47",
-      "entityCode": "WK6000002080",
-      "entityName": "Grille Radiator Molding CTR RG10 Chrome",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002200",
-      "entityType": "PART",
-      "entityId": "48",
-      "entityCode": "WK6000002200",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 LH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002210",
-      "entityType": "PART",
-      "entityId": "49",
-      "entityCode": "WK6000002210",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 RH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002220",
-      "entityType": "PART",
-      "entityId": "50",
-      "entityCode": "WK6000002220",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 RH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002230",
-      "entityType": "PART",
-      "entityId": "51",
-      "entityCode": "WK6000002230",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 RH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000002240",
-      "entityType": "PART",
-      "entityId": "52",
-      "entityCode": "WK6000002240",
-      "entityName": "GRILLE FRT BMPR MOLDING LWR CTR RG14 ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000003770",
-      "entityType": "PART",
-      "entityId": "53",
-      "entityCode": "WK6000003770",
-      "entityName": "PAD DR SOFT SKIN RH RJ08 K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000003780",
-      "entityType": "PART",
-      "entityId": "54",
-      "entityCode": "WK6000003780",
-      "entityName": "PAD DR SOFT SKIN RH RJ08 U419",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000003820",
-      "entityType": "PART",
-      "entityId": "55",
-      "entityCode": "WK6000003820",
-      "entityName": "PAD DR SOFT SKIN LH RJ08 U419",
-      "isActive": true
-    },
-    {
-      "qrValue": "WK6000003840",
-      "entityType": "PART",
-      "entityId": "56",
-      "entityCode": "WK6000003840",
-      "entityName": "Pad AS; Cover ASM I/P T/PNL;  RJ08 RHD, Soft Skin  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000030",
-      "entityType": "PART",
-      "entityId": "57",
-      "entityCode": "WN6000000030",
-      "entityName": "Lid Box;  RHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000040",
-      "entityType": "PART",
-      "entityId": "58",
-      "entityCode": "WN6000000040",
-      "entityName": "Lid Box;  LHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000070",
-      "entityType": "PART",
-      "entityId": "59",
-      "entityCode": "WN6000000070",
-      "entityName": "Garnish  Frt  Door ;RH Black  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000080",
-      "entityType": "PART",
-      "entityId": "60",
-      "entityCode": "WN6000000080",
-      "entityName": "Garnish  Frt  Door ;LH Black  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000720",
-      "entityType": "PART",
-      "entityId": "61",
-      "entityCode": "WN6000000720",
-      "entityName": "FRT S/D TR;  PWR / RH N052 ( No.1 )",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000000740",
-      "entityType": "PART",
-      "entityId": "62",
-      "entityCode": "WN6000000740",
-      "entityName": "FRT S/D TR;  PWR / RH N052 ( No.1 )",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002240",
-      "entityType": "PART",
-      "entityId": "63",
-      "entityCode": "WN6000002240",
-      "entityName": "Cover Extension; RH (Black) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002250",
-      "entityType": "PART",
-      "entityId": "64",
-      "entityCode": "WN6000002250",
-      "entityName": "Cover Extension; LH (Black) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002510",
-      "entityType": "PART",
-      "entityId": "65",
-      "entityCode": "WN6000002510",
-      "entityName": "INST;  RHD  , RT50 N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002580",
-      "entityType": "PART",
-      "entityId": "66",
-      "entityCode": "WN6000002580",
-      "entityName": "LID OTR Utility   RHD (RF20)  (Grain G157) (RF20)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002600",
-      "entityType": "PART",
-      "entityId": "67",
-      "entityCode": "WN6000002600",
-      "entityName": "Lid Utility Box Inner RHD (RF20)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002610",
-      "entityType": "PART",
-      "entityId": "68",
-      "entityCode": "WN6000002610",
-      "entityName": "FRT S/D TR;  LWR RH U728 RF20",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002620",
-      "entityType": "PART",
-      "entityId": "69",
-      "entityCode": "WN6000002620",
-      "entityName": "FRT S/D TR;  LWR RH N052 RF20",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002630",
-      "entityType": "PART",
-      "entityId": "70",
-      "entityCode": "WN6000002630",
-      "entityName": "FRT S/D TR;  LWR LH U728 RF20",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002640",
-      "entityType": "PART",
-      "entityId": "71",
-      "entityCode": "WN6000002640",
-      "entityName": "FRT S/D TR;  LWR LH N052 RF20",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002720",
-      "entityType": "PART",
-      "entityId": "72",
-      "entityCode": "WN6000002720",
-      "entityName": "RR  LWR;  RH (RF20)  U728",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002730",
-      "entityType": "PART",
-      "entityId": "73",
-      "entityCode": "WN6000002730",
-      "entityName": "RR  LWR;  RH (RF20)  N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002740",
-      "entityType": "PART",
-      "entityId": "74",
-      "entityCode": "WN6000002740",
-      "entityName": "RR  LWR;  LH (RF20)  U728",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000002750",
-      "entityType": "PART",
-      "entityId": "75",
-      "entityCode": "WN6000002750",
-      "entityName": "RR  LWR;  LH (RF20)  N052",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003040",
-      "entityType": "PART",
-      "entityId": "76",
-      "entityCode": "WN6000003040",
-      "entityName": "Panel INST LWR RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003100",
-      "entityType": "PART",
-      "entityId": "77",
-      "entityCode": "WN6000003100",
-      "entityName": "BELT REINFORCEMENT RR RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003110",
-      "entityType": "PART",
-      "entityId": "78",
-      "entityCode": "WN6000003110",
-      "entityName": "BELT REINFORCEMENT RR LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003160",
-      "entityType": "PART",
-      "entityId": "79",
-      "entityCode": "WN6000003160",
-      "entityName": "GRILLE SPEAKER RR RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003170",
-      "entityType": "PART",
-      "entityId": "80",
-      "entityCode": "WN6000003170",
-      "entityName": "GRILLE SPEAKER RR LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003180",
-      "entityType": "PART",
-      "entityId": "81",
-      "entityCode": "WN6000003180",
-      "entityName": "GRILLE SPEAKER FRT RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003190",
-      "entityType": "PART",
-      "entityId": "82",
-      "entityCode": "WN6000003190",
-      "entityName": "GRILLE SPEAKER FRT LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003260",
-      "entityType": "PART",
-      "entityId": "83",
-      "entityCode": "WN6000003260",
-      "entityName": "FRT S/D TR LWR;  RH ( RG01 ) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003270",
-      "entityType": "PART",
-      "entityId": "84",
-      "entityCode": "WN6000003270",
-      "entityName": "FRT S/D TR LWR;  LH ( RG01 ) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003280",
-      "entityType": "PART",
-      "entityId": "85",
-      "entityCode": "WN6000003280",
-      "entityName": "INST UPR Base;  RHD, W/O FCW (RG01) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003290",
-      "entityType": "PART",
-      "entityId": "86",
-      "entityCode": "WN6000003290",
-      "entityName": "AIR BAG CHUTER PAB SOFT RHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003301",
-      "entityType": "PART",
-      "entityId": "87",
-      "entityCode": "WN6000003301",
-      "entityName": "INST UPR;  RG01 RHD (Soft )  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003310",
-      "entityType": "PART",
-      "entityId": "88",
-      "entityCode": "WN6000003310",
-      "entityName": "AIR BAG CHUTER PAB HARD RHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003321",
-      "entityType": "PART",
-      "entityId": "89",
-      "entityCode": "WN6000003321",
-      "entityName": "INST UPR;  RG01 RHD (Hard ) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003680",
-      "entityType": "PART",
-      "entityId": "90",
-      "entityCode": "WN6000003680",
-      "entityName": "INST UPR  RHD (REG), W/ FCW,",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003690",
-      "entityType": "PART",
-      "entityId": "91",
-      "entityCode": "WN6000003690",
-      "entityName": "INST UPR  RHD (REG), W/O FCW,",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003700",
-      "entityType": "PART",
-      "entityId": "92",
-      "entityCode": "WN6000003700",
-      "entityName": "AIR BAG CHUTER PAB SOFT LH RG01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003710",
-      "entityType": "PART",
-      "entityId": "93",
-      "entityCode": "WN6000003710",
-      "entityName": "AIR BAG CHUTER PAB HARD LH RG01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003810",
-      "entityType": "PART",
-      "entityId": "94",
-      "entityCode": "WN6000003810",
-      "entityName": "PAD DR SOFT SKIN LH RJ08 K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003820",
-      "entityType": "PART",
-      "entityId": "95",
-      "entityCode": "WN6000003820",
-      "entityName": "Grille Radiator; (4X) DK ( Gray)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003840",
-      "entityType": "PART",
-      "entityId": "96",
-      "entityCode": "WN6000003840",
-      "entityName": "INST UPR;  LHD (REG), W/FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003850",
-      "entityType": "PART",
-      "entityId": "97",
-      "entityCode": "WN6000003850",
-      "entityName": "INST UPR  LHD (REG), W/O FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003860",
-      "entityType": "PART",
-      "entityId": "98",
-      "entityCode": "WN6000003860",
-      "entityName": "INST (UPR Base)  W/O FCW,LHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003870",
-      "entityType": "PART",
-      "entityId": "99",
-      "entityCode": "WN6000003870",
-      "entityName": "INST  (UPR Base) ,W/FCW,LHD  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003890",
-      "entityType": "PART",
-      "entityId": "100",
-      "entityCode": "WN6000003890",
-      "entityName": "INST UPR  UPR LH (Soft)  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003910",
-      "entityType": "PART",
-      "entityId": "101",
-      "entityCode": "WN6000003910",
-      "entityName": "INST UPR;  RG01 LHD ( Hard ) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000003920",
-      "entityType": "PART",
-      "entityId": "102",
-      "entityCode": "WN6000003920",
-      "entityName": "INST UPR Base;  RHD, W/FCW (RG01) K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004040",
-      "entityType": "PART",
-      "entityId": "103",
-      "entityCode": "WN6000004040",
-      "entityName": "REINFORCEMENT FRT RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004050",
-      "entityType": "PART",
-      "entityId": "104",
-      "entityCode": "WN6000004050",
-      "entityName": "REINFORCEMENT FRT LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004061",
-      "entityType": "PART",
-      "entityId": "105",
-      "entityCode": "WN6000004061",
-      "entityName": "Panel RR S/D TR UPR; RH RG04",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004071",
-      "entityType": "PART",
-      "entityId": "106",
-      "entityCode": "WN6000004071",
-      "entityName": "Panel RR S/D TR UPR; LH RG04",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004080",
-      "entityType": "PART",
-      "entityId": "107",
-      "entityCode": "WN6000004080",
-      "entityName": "BELT REINF RR RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004090",
-      "entityType": "PART",
-      "entityId": "108",
-      "entityCode": "WN6000004090",
-      "entityName": "BELT REINF RR LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004100",
-      "entityType": "PART",
-      "entityId": "109",
-      "entityCode": "WN6000004100",
-      "entityName": "Panel INST UPR Base;  RG04 RHD, W/O FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004110",
-      "entityType": "PART",
-      "entityId": "110",
-      "entityCode": "WN6000004110",
-      "entityName": "Panel INST UPR Base;  RG04 RHD, W/FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004130",
-      "entityType": "PART",
-      "entityId": "111",
-      "entityCode": "WN6000004130",
-      "entityName": "CHUTER PAB RHD RG04",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004270",
-      "entityType": "PART",
-      "entityId": "112",
-      "entityCode": "WN6000004270",
-      "entityName": "INST UPR Base;  RHD Base Grade, W/O",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004280",
-      "entityType": "PART",
-      "entityId": "113",
-      "entityCode": "WN6000004280",
-      "entityName": "INST  (REG), W/O PAB W/O FCW,LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004290",
-      "entityType": "PART",
-      "entityId": "114",
-      "entityCode": "WN6000004290",
-      "entityName": "INST(Hard)  W/OPAB, LHD K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004530",
-      "entityType": "PART",
-      "entityId": "115",
-      "entityCode": "WN6000004530",
-      "entityName": "CHUTER PAB RH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004590",
-      "entityType": "PART",
-      "entityId": "116",
-      "entityCode": "WN6000004590",
-      "entityName": "CHUTER PAB LH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004730",
-      "entityType": "PART",
-      "entityId": "117",
-      "entityCode": "WN6000004730",
-      "entityName": "BELT REINFORCEMENT RR RH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004740",
-      "entityType": "PART",
-      "entityId": "118",
-      "entityCode": "WN6000004740",
-      "entityName": "BELT REINFORCEMENT RR LH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004780",
-      "entityType": "PART",
-      "entityId": "119",
-      "entityCode": "WN6000004780",
-      "entityName": "Panel INST UPR Base;  RG04 LH, W/O FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004790",
-      "entityType": "PART",
-      "entityId": "120",
-      "entityCode": "WN6000004790",
-      "entityName": "Panel INST UPR Base;  RG04 LH, W/FCW",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004810",
-      "entityType": "PART",
-      "entityId": "121",
-      "entityCode": "WN6000004810",
-      "entityName": "AIR BAG CHUTER PAB LH RG04",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004820",
-      "entityType": "PART",
-      "entityId": "122",
-      "entityCode": "WN6000004820",
-      "entityName": "Pocket RR RH RG01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004830",
-      "entityType": "PART",
-      "entityId": "123",
-      "entityCode": "WN6000004830",
-      "entityName": "Pocket RR LH RG01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004840",
-      "entityType": "PART",
-      "entityId": "124",
-      "entityCode": "WN6000004840",
-      "entityName": "INST PANEL LWR CTR RH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004850",
-      "entityType": "PART",
-      "entityId": "125",
-      "entityCode": "WN6000004850",
-      "entityName": "INST PANEL LWR CTR LH RJ01",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004870",
-      "entityType": "PART",
-      "entityId": "126",
-      "entityCode": "WN6000004870",
-      "entityName": "Panel INST UPR PAD;  RG04 RHD W/Sticker",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004880",
-      "entityType": "PART",
-      "entityId": "127",
-      "entityCode": "WN6000004880",
-      "entityName": "Panel INST UPR PAD;  RG04 LH Black K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004950",
-      "entityType": "PART",
-      "entityId": "128",
-      "entityCode": "WN6000004950",
-      "entityName": "Panel INST UPR PAD;  RJ01 RHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000004960",
-      "entityType": "PART",
-      "entityId": "129",
-      "entityCode": "WN6000004960",
-      "entityName": "Panel INST UPR PAD;  RJ01 LHD",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005140",
-      "entityType": "PART",
-      "entityId": "130",
-      "entityCode": "WN6000005140",
-      "entityName": "GRULLE FRT BMP MOLDING CTR RG10 ABS PAINT",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005220",
-      "entityType": "PART",
-      "entityId": "131",
-      "entityCode": "WN6000005220",
-      "entityName": "GRILLE FRT BMP MOLDING CTR RG10 ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005350",
-      "entityType": "PART",
-      "entityId": "132",
-      "entityCode": "WN6000005350",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 LH ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005360",
-      "entityType": "PART",
-      "entityId": "133",
-      "entityCode": "WN6000005360",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 LH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005370",
-      "entityType": "PART",
-      "entityId": "134",
-      "entityCode": "WN6000005370",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 RH ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005380",
-      "entityType": "PART",
-      "entityId": "135",
-      "entityCode": "WN6000005380",
-      "entityName": "GRILLE FRT FASCIA UPR RG14 RH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005390",
-      "entityType": "PART",
-      "entityId": "136",
-      "entityCode": "WN6000005390",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 LH ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005400",
-      "entityType": "PART",
-      "entityId": "137",
-      "entityCode": "WN6000005400",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 LH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005410",
-      "entityType": "PART",
-      "entityId": "138",
-      "entityCode": "WN6000005410",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 LH ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005420",
-      "entityType": "PART",
-      "entityId": "139",
-      "entityCode": "WN6000005420",
-      "entityName": "GRILLE FRT BPR MOLDING LWR RG14 RH ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005430",
-      "entityType": "PART",
-      "entityId": "140",
-      "entityCode": "WN6000005430",
-      "entityName": "GRILLE FRT BMPR MOLDING LWR CTR RG14 ASA",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005440",
-      "entityType": "PART",
-      "entityId": "141",
-      "entityCode": "WN6000005440",
-      "entityName": "GRILLE FRT BMPR MOLDING LWR CTR RG14 ABS",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005591",
-      "entityType": "PART",
-      "entityId": "142",
-      "entityCode": "WN6000005591",
-      "entityName": "Cargo Spoiler Side Cover OTR; LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005601",
-      "entityType": "PART",
-      "entityId": "143",
-      "entityCode": "WN6000005601",
-      "entityName": "Cargo Spoiler Side Cover OTR; RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005610",
-      "entityType": "PART",
-      "entityId": "144",
-      "entityCode": "WN6000005610",
-      "entityName": "Cargo Spoiler Side Cover INR; RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005620",
-      "entityType": "PART",
-      "entityId": "145",
-      "entityCode": "WN6000005620",
-      "entityName": "Cargo Spoiler Side Cover INR; LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005740",
-      "entityType": "PART",
-      "entityId": "146",
-      "entityCode": "WN6000005740",
-      "entityName": "Extender Upper Cover; LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005750",
-      "entityType": "PART",
-      "entityId": "147",
-      "entityCode": "WN6000005750",
-      "entityName": "Extender Lower Cover; LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005760",
-      "entityType": "PART",
-      "entityId": "148",
-      "entityCode": "WN6000005760",
-      "entityName": "Extender Upper Cover; RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005770",
-      "entityType": "PART",
-      "entityId": "149",
-      "entityCode": "WN6000005770",
-      "entityName": "Extender Lower Cover; RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005830",
-      "entityType": "PART",
-      "entityId": "150",
-      "entityCode": "WN6000005830",
-      "entityName": "RJ08 PAD DR SUBSTATE RH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005840",
-      "entityType": "PART",
-      "entityId": "151",
-      "entityCode": "WN6000005840",
-      "entityName": "Substrate AS; Cover ASM I/P T/PNL;  RJ08 (INJ) RHD, K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005910",
-      "entityType": "PART",
-      "entityId": "152",
-      "entityCode": "WN6000005910",
-      "entityName": "Substrate AS; Cover ASM I/P T/PNL;  RJ08 (INJ) LHD, K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005930",
-      "entityType": "PART",
-      "entityId": "153",
-      "entityCode": "WN6000005930",
-      "entityName": "Pad AS; Cover ASM I/P T/PNL; LHD  U419",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000005960",
-      "entityType": "PART",
-      "entityId": "154",
-      "entityCode": "WN6000005960",
-      "entityName": "RJ08 PAD DR SUBSTATE LH",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006180",
-      "entityType": "PART",
-      "entityId": "155",
-      "entityCode": "WN6000006180",
-      "entityName": "PAD DR SOFT SKIN RH RJ08 K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006190",
-      "entityType": "PART",
-      "entityId": "156",
-      "entityCode": "WN6000006190",
-      "entityName": "PAD DR SOFT SKIN RH RJ08 U419",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006210",
-      "entityType": "PART",
-      "entityId": "157",
-      "entityCode": "WN6000006210",
-      "entityName": "PAD ASST SOFT SKIN RH K701 RJ08 K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006220",
-      "entityType": "PART",
-      "entityId": "158",
-      "entityCode": "WN6000006220",
-      "entityName": "PAD ASST SOFT SKIN RH U419",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006230",
-      "entityType": "PART",
-      "entityId": "159",
-      "entityCode": "WN6000006230",
-      "entityName": "Pad AS; Cover ASM I/P T/PNL;  LHD  Black K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006380",
-      "entityType": "PART",
-      "entityId": "160",
-      "entityCode": "WN6000006380",
-      "entityName": "Bumper Side; RH VC67 (INJ), KIJI K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006390",
-      "entityType": "PART",
-      "entityId": "161",
-      "entityCode": "WN6000006390",
-      "entityName": "Bumper Side; LH VC67 (INJ), KIJI K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006480",
-      "entityType": "PART",
-      "entityId": "162",
-      "entityCode": "WN6000006480",
-      "entityName": "Grille FRT BPR Fascia MLD UPR;  RH RG21 (INJ) ASA DK Gray N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006490",
-      "entityType": "PART",
-      "entityId": "163",
-      "entityCode": "WN6000006490",
-      "entityName": "Grille FRT BPR Fascia MLD UPR;  LH RG21 (INJ) ASA DK Gray N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006500",
-      "entityType": "PART",
-      "entityId": "164",
-      "entityCode": "WN6000006500",
-      "entityName": "Grille FRT BPR Fascia MLD UPR;  RH RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006510",
-      "entityType": "PART",
-      "entityId": "165",
-      "entityCode": "WN6000006510",
-      "entityName": "Grille FRT BPR Fascia MLD UPR;  LH RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006520",
-      "entityType": "PART",
-      "entityId": "166",
-      "entityCode": "WN6000006520",
-      "entityName": "Grille FRT BPR Fascia MLD UPR CTR;  RG21 (INJ) ASA DK Gray N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006530",
-      "entityType": "PART",
-      "entityId": "167",
-      "entityCode": "WN6000006530",
-      "entityName": "Grille FRT BPR Fascia MLD UPR CTR;  RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006540",
-      "entityType": "PART",
-      "entityId": "168",
-      "entityCode": "WN6000006540",
-      "entityName": "Grille FRT BPR Fascia MLD LWR;  RH RG21 (INJ) N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006550",
-      "entityType": "PART",
-      "entityId": "169",
-      "entityCode": "WN6000006550",
-      "entityName": "Grille FRT BPR Fascia MLD LWR;  LH RG21 (INJ) N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006560",
-      "entityType": "PART",
-      "entityId": "170",
-      "entityCode": "WN6000006560",
-      "entityName": "Grille FRT BPR Fascia MLD LWR;  LH RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006570",
-      "entityType": "PART",
-      "entityId": "171",
-      "entityCode": "WN6000006570",
-      "entityName": "Grille FRT BPR Fascia MLD LWR;  LH RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006580",
-      "entityType": "PART",
-      "entityId": "172",
-      "entityCode": "WN6000006580",
-      "entityName": "Grille FRT BPR Fascia MLD LWR  CTR;  RG21 (INJ)ASA DK Gray N057",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006590",
-      "entityType": "PART",
-      "entityId": "173",
-      "entityCode": "WN6000006590",
-      "entityName": "Grille FRT BPR Fascia MLD LWR CTR;  RG21 (INJ) ABS Gray",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006790",
-      "entityType": "PART",
-      "entityId": "174",
-      "entityCode": "WN6000006790",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  RH RG21 W/O Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "WN6000006800",
-      "entityType": "PART",
-      "entityId": "175",
-      "entityCode": "WN6000006800",
-      "entityName": "Cover FRT BPR Fascia OPG Narrow;  LH RG21 W/O Fog,",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000007590",
-      "entityType": "PART",
-      "entityId": "176",
-      "entityCode": "WP6000007590",
-      "entityName": "FRT UPR;  RH RG01 Touch Up",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000007600",
-      "entityType": "PART",
-      "entityId": "177",
-      "entityCode": "WP6000007600",
-      "entityName": "FRT UPR;  LH RG01 Touch Up",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000007650",
-      "entityType": "PART",
-      "entityId": "178",
-      "entityCode": "WP6000007650",
-      "entityName": "FRT S/D TR;  MNL, RH ( Grain G289 )  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000007660",
-      "entityType": "PART",
-      "entityId": "179",
-      "entityCode": "WP6000007660",
-      "entityName": "FRT S/D TR;  MNL, RH ( Grain G289 )  K701",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000008050",
-      "entityType": "PART",
-      "entityId": "180",
-      "entityCode": "WP6000008050",
-      "entityName": "RR S/D TR; LH (RJ01)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000008060",
-      "entityType": "PART",
-      "entityId": "181",
-      "entityCode": "WP6000008060",
-      "entityName": "RR S/D TR; RH (RJ01)",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000010560",
-      "entityType": "PART",
-      "entityId": "182",
-      "entityCode": "WP6000010560",
-      "entityName": "Grille FRT BPR Fascia INR Wide;  RG14",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000010570",
-      "entityType": "PART",
-      "entityId": "183",
-      "entityCode": "WP6000010570",
-      "entityName": "Grille FRT BPR Fascia INR Narrow;  RG14",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000012090",
-      "entityType": "PART",
-      "entityId": "184",
-      "entityCode": "WP6000012090",
-      "entityName": "Grille FRT BPR Fascia INR Wide;  RG21",
-      "isActive": true
-    },
-    {
-      "qrValue": "WP6000012130",
-      "entityType": "PART",
-      "entityId": "185",
-      "entityCode": "WP6000012130",
-      "entityName": "Grille FRT BPR Fascia INR Narrow;  RG21",
-      "isActive": true
-    },
-    {
-      "qrValue": "WS6000000440",
-      "entityType": "PART",
-      "entityId": "186",
-      "entityCode": "WS6000000440",
-      "entityName": "Grille Radiator Cover;  RJ08",
-      "isActive": true
+      <div class="field">
+        <label for="timelineSearch">Work</label>
+        <input id="timelineSearch" type="search" placeholder="ค้นหาใน Timeline" />
+      </div>
+
+      <button class="primary" id="buildTimeline" type="button">สร้าง Timeline</button>
+      <button id="showAll" type="button">แสดงทั้งหมด</button>
+
+      <div class="summary">
+        <span>งาน: <strong id="taskCount">0</strong></span>
+        <span>เวลารวม: <strong id="totalMinutes">0m</strong></span>
+        <span>งานยาวสุด: <strong id="longestTask">0m</strong></span>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- =======================================================
+         View 1: Part Selector
+         ======================================================= -->
+    <section class="view active" id="selectorView">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="field">
+            <label for="scanInput">Scan Part Tag</label>
+            <input
+              id="scanInput"
+              class="scan-input"
+              type="search"
+              autocomplete="off"
+              placeholder="สแกน Part Tag / QR แล้วกด Enter"
+            />
+          </div>
+
+          <div class="field">
+            <label for="defaultStartDate">วันที่เริ่มฉีดเริ่มต้น</label>
+            <input id="defaultStartDate" type="date" value="2026-04-01" />
+          </div>
+
+          <div class="field">
+            <label for="defaultStartTime">เวลาเริ่มฉีดเริ่มต้น</label>
+            <input id="defaultStartTime" type="time" value="08:00" />
+          </div>
+
+          <button id="clearSelected" type="button">ล้างแผน</button>
+          <button class="primary" id="goTimeline" type="button">นำไปสร้าง Timeline</button>
+
+          <div id="scanStatus" class="status">พร้อมสแกน Part Tag</div>
+          <div class="hint">
+            ระบบจะหา QR ใน mapping แล้วจับคู่กับ MC/Cycle time อัตโนมัติ ถ้า Part เดียวพบหลาย MC จะเพิ่มตัวเลือกทั้งหมดในแผน
+          </div>
+        </div>
+
+        <div class="panel-head">
+          <div class="field">
+            <label for="historyName">ชื่อแผน</label>
+            <input id="historyName" type="text" placeholder="เช่น แผนเช้า MC 18" />
+          </div>
+
+          <button id="saveHistory" type="button">บันทึกประวัติ</button>
+
+          <div class="field">
+            <label for="historySelect">เรียกดูย้อนหลัง</label>
+            <select id="historySelect"></select>
+          </div>
+
+          <button id="loadHistory" type="button">โหลดแผน</button>
+          <button id="deleteHistory" type="button">ลบประวัติ</button>
+        </div>
+
+        <div class="summary" id="planSummary"></div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>MC</th>
+                <th>MMPT NO.</th>
+                <th>Description</th>
+                <th>Cycle</th>
+                <th>Model</th>
+                <th>Package</th>
+                <th>Std Qty</th>
+                <th>Plan Qty</th>
+                <th>Start Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="partRows">
+              <tr><td colspan="12">ยังไม่มีรายการที่สแกน</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         View 2: Timeline
+         ======================================================= -->
+    <section class="view" id="timelineView">
+      <div class="show-mc" id="showMc"></div>
+
+      <div class="chart-shell">
+        <div class="axis-row">
+          <div class="corner">Day</div>
+          <div class="hours" id="hours"></div>
+        </div>
+
+        <div id="chart">
+          <div class="empty">เลือก Part แล้วกดสร้าง Timeline</div>
+        </div>
+      </div>
+
+      <div class="legend" id="legend"></div>
+    </section>
+
+    <!-- =======================================================
+         View 3: Detail
+         ======================================================= -->
+    <section class="view" id="detailView">
+      <div class="panel">
+        <div class="panel-head">
+          <button id="exportDetailExcel" type="button">Export Excel</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Day</th>
+                <th>MC</th>
+                <th>MMPT NO.</th>
+                <th>Part Name</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Min</th>
+                <th>Cycle</th>
+                <th>Qty</th>
+                <th>Model</th>
+                <th>Package</th>
+              </tr>
+            </thead>
+            <tbody id="detailRows">
+              <tr><td colspan="11">ยังไม่มี Timeline</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- =======================================================
+         View 4: Master Data
+         ======================================================= -->
+    <section class="view" id="masterView">
+      <div class="panel">
+        <div class="panel-head">
+          <div class="field">
+            <label for="masterSearch">Search</label>
+            <input id="masterSearch" type="search" placeholder="ค้นหา MC / MMPT / Description" />
+          </div>
+
+          <button class="primary" id="addMasterRow" type="button">เพิ่ม Master</button>
+          <button id="saveMasterRows" type="button">บันทึก Master</button>
+          <div class="status" id="masterStatus">Master พร้อมใช้งาน</div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>MC</th>
+                <th>MMPT NO.</th>
+                <th>Description</th>
+                <th>Cycle</th>
+                <th>Model</th>
+                <th>Package</th>
+                <th>Std Qty</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="masterRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- =========================================================
+       DATA AREA
+       แนะนำ: ย้ายข้อมูล Master/QR ทั้งหมดไปไว้ในไฟล์ data/master-data.js
+       เพื่อลดความยาวของไฟล์ HTML
+
+       ตัวอย่างโครงสร้างไฟล์ data/master-data.js:
+       window.masterData = {
+         catalog: [],
+         qrCodes: [],
+         records: []
+       };
+       ========================================================= -->
+  <script src="data/master-data.js"></script>
+
+  <script>
+    /* =========================================================
+       1) Constants / DOM References
+       ========================================================= */
+    const STORAGE_KEY = 'mcProductionPlanner.v1';
+    const HISTORY_STORAGE_KEY = 'mcProductionPlanner.history.v1';
+    const MASTER_STORAGE_KEY = 'mcProductionPlanner.masterRecords.v1';
+
+    const palette = [
+      ['#0b67c8', '#05498f', '#043c78'],
+      ['#8b5cf6', '#5b35bc', '#4c2a9f'],
+      ['#f97316', '#b45309', '#92400e'],
+      ['#14b8a6', '#0f766e', '#115e59'],
+      ['#22c55e', '#15803d', '#166534'],
+      ['#ef4444', '#b91c1c', '#991b1b'],
+      ['#06b6d4', '#0e7490', '#155e75'],
+      ['#ec4899', '#be185d', '#9d174d']
+    ];
+
+    const els = {
+      partRows: byId('partRows'),
+      scanInput: byId('scanInput'),
+      scanStatus: byId('scanStatus'),
+      defaultStartDate: byId('defaultStartDate'),
+      defaultStartTime: byId('defaultStartTime'),
+      clearSelected: byId('clearSelected'),
+      goTimeline: byId('goTimeline'),
+      historyName: byId('historyName'),
+      saveHistory: byId('saveHistory'),
+      historySelect: byId('historySelect'),
+      loadHistory: byId('loadHistory'),
+      deleteHistory: byId('deleteHistory'),
+      planSummary: byId('planSummary'),
+      dayFilter: byId('dayFilter'),
+      mcTimelineFilter: byId('mcTimelineFilter'),
+      timelineSearch: byId('timelineSearch'),
+      buildTimeline: byId('buildTimeline'),
+      showAll: byId('showAll'),
+      showMc: byId('showMc'),
+      hours: byId('hours'),
+      chart: byId('chart'),
+      legend: byId('legend'),
+      detailRows: byId('detailRows'),
+      exportDetailExcel: byId('exportDetailExcel'),
+      masterSearch: byId('masterSearch'),
+      addMasterRow: byId('addMasterRow'),
+      saveMasterRows: byId('saveMasterRows'),
+      masterRows: byId('masterRows'),
+      masterStatus: byId('masterStatus'),
+      taskCount: byId('taskCount'),
+      totalMinutes: byId('totalMinutes'),
+      longestTask: byId('longestTask'),
+      printPage: byId('printPage')
+    };
+
+    const masterData = window.masterData || {};
+
+    let records = Array.isArray(masterData.records) ? masterData.records.map(normalizeRecord) : [];
+    let masterCatalog = Array.isArray(masterData.catalog) ? masterData.catalog : [];
+    let qrMappings = Array.isArray(masterData.qrCodes) ? masterData.qrCodes : [];
+
+    let planned = {};
+    let tasks = [];
+    let days = [];
+    let mcs = [];
+    let detailExportRows = [];
+
+    /* =========================================================
+       2) Utility Functions
+       ========================================================= */
+    function byId(id) {
+      return document.getElementById(id);
     }
-  ]
-}</script>
-<script src="data/master-data.js"></script>
-<script>
-const palette=[["#0b67c8","#05498f","#043c78"],["#8b5cf6","#5b35bc","#4c2a9f"],["#f97316","#b45309","#92400e"],["#14b8a6","#0f766e","#115e59"],["#22c55e","#15803d","#166534"],["#ef4444","#b91c1c","#991b1b"],["#06b6d4","#0e7490","#155e75"],["#ec4899","#be185d","#9d174d"],["#a16207","#854d0e","#713f12"],["#2563eb","#1d4ed8","#1e40af"],["#7c3aed","#6d28d9","#5b21b6"],["#059669","#047857","#065f46"],["#dc2626","#b91c1c","#7f1d1d"],["#0891b2","#0e7490","#164e63"],["#c026d3","#a21caf","#86198f"],["#4f46e5","#4338ca","#3730a3"]];
-const els={partRows:document.getElementById("partRows"),scanInput:document.getElementById("scanInput"),scanStatus:document.getElementById("scanStatus"),defaultStartDate:document.getElementById("defaultStartDate"),defaultStartTime:document.getElementById("defaultStartTime"),clearSelected:document.getElementById("clearSelected"),goTimeline:document.getElementById("goTimeline"),historyName:document.getElementById("historyName"),saveHistory:document.getElementById("saveHistory"),historySelect:document.getElementById("historySelect"),loadHistory:document.getElementById("loadHistory"),deleteHistory:document.getElementById("deleteHistory"),planSummary:document.getElementById("planSummary"),dayFilter:document.getElementById("dayFilter"),mcTimelineFilter:document.getElementById("mcTimelineFilter"),timelineSearch:document.getElementById("timelineSearch"),buildTimeline:document.getElementById("buildTimeline"),showAll:document.getElementById("showAll"),showMc:document.getElementById("showMc"),hours:document.getElementById("hours"),chart:document.getElementById("chart"),legend:document.getElementById("legend"),detailRows:document.getElementById("detailRows"),masterSearch:document.getElementById("masterSearch"),addMasterRow:document.getElementById("addMasterRow"),saveMasterRows:document.getElementById("saveMasterRows"),masterRows:document.getElementById("masterRows"),masterStatus:document.getElementById("masterStatus"),taskCount:document.getElementById("taskCount"),totalMinutes:document.getElementById("totalMinutes"),longestTask:document.getElementById("longestTask"),printPage:document.getElementById("printPage")};
-const embeddedRecords=parseMcMaster(document.getElementById("mcMasterRaw").textContent);const embeddedQrMappings=JSON.parse(document.getElementById("qrMappingRaw").textContent).mappings||[];const masterData=window.masterData||{};const masterCatalog=Array.isArray(masterData.catalog)?masterData.catalog:[];const qrMappings=Array.isArray(masterData.qrCodes)&&masterData.qrCodes.length?masterData.qrCodes:embeddedQrMappings;const storageKey="mcProductionPlanner.v1",historyStorageKey="mcProductionPlanner.history.v1",masterStorageKey="mcProductionPlanner.masterRecords.v1";let records=embeddedRecords.slice();let planned={};let tasks=[],days=[],mcs=[];
-function esc(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c];});}
-function currentPlannerState(){return {planned:planned,defaultStartDate:els.defaultStartDate.value,defaultStartTime:els.defaultStartTime.value};}
-function applyPlannerState(saved){if(!saved)return;if(saved.defaultStartDate)els.defaultStartDate.value=saved.defaultStartDate;if(saved.defaultStartTime)els.defaultStartTime.value=saved.defaultStartTime;if(saved.planned&&typeof saved.planned==="object")planned=saved.planned;}
-function savePlannerState(){const state=currentPlannerState();try{localStorage.setItem(storageKey,JSON.stringify(state));}catch(e){}fetch("/api/state",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify(state)}).catch(function(){});}
-async function loadPlannerState(){try{applyPlannerState(JSON.parse(localStorage.getItem(storageKey)||"null"));}catch(e){planned={};}try{const res=await fetch("/api/state");if(res.ok){const remote=await res.json();if(remote){applyPlannerState(remote);try{localStorage.setItem(storageKey,JSON.stringify(remote));}catch(e){}}}}catch(e){}}
-function cloneData(value){return JSON.parse(JSON.stringify(value));}
-function loadHistoryItems(){try{const items=JSON.parse(localStorage.getItem(historyStorageKey)||"[]");return Array.isArray(items)?items:[];}catch(e){return [];}}
-function saveHistoryItems(items){localStorage.setItem(historyStorageKey,JSON.stringify(items));}
-async function fetchHistoryItems(){try{const res=await fetch("/api/history");if(res.ok){const items=await res.json();if(Array.isArray(items)){saveHistoryItems(items);return items;}}}catch(e){}return loadHistoryItems();}
-async function renderHistoryOptions(){const items=await fetchHistoryItems();els.historySelect.innerHTML=items.length?items.map(function(item){return "<option value=\""+esc(item.id)+"\">"+esc(item.name)+" ("+esc(item.savedAtText)+")</option>";}).join(""):"<option value=\"\">ยังไม่มีประวัติ</option>";}
-function makeHistoryName(){const now=new Date(),valid=selectedPlan().filter(Boolean);return "Plan "+dateKey(now)+" "+timeText(now)+" / "+valid.length+" jobs";}
-async function saveCurrentToHistory(){if(!Object.keys(planned).length){alert("ยังไม่มีรายการให้บันทึก");return}const now=new Date(),items=loadHistoryItems(),name=(els.historyName.value||"").trim()||makeHistoryName(),item={id:String(Date.now()),name:name,savedAt:now.toISOString(),savedAtText:dateKey(now)+" "+timeText(now),planned:cloneData(planned),defaultStartDate:els.defaultStartDate.value,defaultStartTime:els.defaultStartTime.value};items.unshift(item);saveHistoryItems(items.slice(0,100));try{await fetch("/api/history",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(item)});}catch(e){}await renderHistoryOptions();els.historySelect.value=item.id;els.historyName.value="";setStatus("บันทึกประวัติแล้ว: "+name,"ok");}
-async function loadSelectedHistory(){const id=els.historySelect.value,items=await fetchHistoryItems(),item=items.find(function(x){return x.id===id;});if(!item){setStatus("ยังไม่ได้เลือกประวัติ","bad");return}planned=cloneData(item.planned||{});if(item.defaultStartDate)els.defaultStartDate.value=item.defaultStartDate;if(item.defaultStartTime)els.defaultStartTime.value=item.defaultStartTime;tasks=[];renderParts();renderTimeline();savePlannerState();switchView("selectorView");setStatus("โหลดประวัติแล้ว: "+item.name,"ok");}
-async function deleteSelectedHistory(){const id=els.historySelect.value;if(!id)return;const items=await fetchHistoryItems(),item=items.find(function(x){return x.id===id;});if(!item||!confirm("ลบประวัติ: "+item.name+" ?"))return;const next=items.filter(function(x){return x.id!==id;});saveHistoryItems(next);try{await fetch("/api/history/"+encodeURIComponent(id),{method:"DELETE"});}catch(e){}await renderHistoryOptions();setStatus("ลบประวัติแล้ว","ok");}
-function setMasterStatus(text,type){els.masterStatus.textContent=text;els.masterStatus.className="status"+(type?" "+type:"");}
-function normalizeRecord(r,i){return {id:Number.isFinite(Number(r.id))?Number(r.id):i,mc:String(r.mc||"").trim().toUpperCase(),no:Number(r.no)||i+1,mmptNo:String(r.mmptNo||"").trim(),description:String(r.description||"").trim(),cycleTime:Number(r.cycleTime)||0,model:String(r.model||"").trim(),package:String(r.package||"").trim(),quantity:Number(r.quantity)||0};}
-function saveMasterLocal(){try{localStorage.setItem(masterStorageKey,JSON.stringify(records));}catch(e){}}
-async function loadMasterRecords(){try{const local=JSON.parse(localStorage.getItem(masterStorageKey)||"null");if(Array.isArray(local)&&local.length)records=local.map(normalizeRecord);}catch(e){}try{const res=await fetch("/api/master-records");if(res.ok){const remote=await res.json();if(Array.isArray(remote)&&remote.length){records=remote.map(normalizeRecord);saveMasterLocal();}}}catch(e){}}
-async function saveMasterRecords(){const valid=records.map(normalizeRecord).filter(function(r){return r.mc&&r.mmptNo&&r.description&&r.cycleTime>0&&r.quantity>0;});if(!valid.length){setMasterStatus("ไม่มี Master ที่บันทึกได้","bad");return}records=valid;saveMasterLocal();try{const res=await fetch("/api/master-records",{method:"PUT",headers:{"Content-Type":"application/json"},body:JSON.stringify({records:records})});if(!res.ok)throw new Error("save failed");setMasterStatus("บันทึก Master แล้ว: "+records.length+" รายการ","ok");}catch(e){setMasterStatus("บันทึกไว้ในเครื่องแล้ว แต่ยังส่งขึ้น server ไม่ได้","bad");}renderMasterRows();renderParts();}
-function renderMasterRows(){const q=(els.masterSearch.value||"").trim().toLowerCase(),rows=records.filter(function(r){return !q||(r.mc+" "+r.mmptNo+" "+r.description+" "+r.model+" "+r.package).toLowerCase().includes(q);});els.masterRows.innerHTML=rows.length?rows.map(function(r){return "<tr data-id=\""+r.id+"\"><td><input class=\"master-mc\" value=\""+esc(r.mc)+"\"></td><td><input class=\"master-mmpt\" value=\""+esc(r.mmptNo)+"\"></td><td><input class=\"master-desc\" value=\""+esc(r.description)+"\"></td><td><input class=\"master-cycle\" type=\"number\" min=\"0\" step=\"0.1\" value=\""+r.cycleTime+"\"></td><td><input class=\"master-model\" value=\""+esc(r.model)+"\"></td><td><input class=\"master-package\" value=\""+esc(r.package)+"\"></td><td><input class=\"master-qty\" type=\"number\" min=\"0\" step=\"1\" value=\""+r.quantity+"\"></td><td><button class=\"delete-master\" type=\"button\">ลบ</button></td></tr>";}).join(""):"<tr><td colspan=\"8\">ไม่พบ Master Data</td></tr>";}
-function syncMasterRow(row){const id=Number(row.dataset.id),r=records.find(function(x){return x.id===id;});if(!r)return;r.mc=row.querySelector(".master-mc").value.trim().toUpperCase();r.mmptNo=row.querySelector(".master-mmpt").value.trim();r.description=row.querySelector(".master-desc").value.trim();r.cycleTime=Number(row.querySelector(".master-cycle").value)||0;r.model=row.querySelector(".master-model").value.trim();r.package=row.querySelector(".master-package").value.trim();r.quantity=Number(row.querySelector(".master-qty").value)||0;saveMasterLocal();}
-function addMasterRecord(){const nextId=records.reduce(function(m,r){return Math.max(m,Number(r.id)||0);},0)+1;records.unshift({id:nextId,mc:"MC",no:nextId,mmptNo:"",description:"",cycleTime:0,model:"",package:"",quantity:0});renderMasterRows();setMasterStatus("เพิ่มแถวใหม่แล้ว กรุณากรอกข้อมูลแล้วกดบันทึก Master","");}
-function parseMcMaster(source){const out=[];let mc="";source.split(/\r?\n/).forEach(function(raw){const line=raw.trim();if(!line)return;const m=line.match(/MC\s*([0-9]+)/i);if(m&&line.includes("-")){mc="MC"+m[1];return}if(!mc||/^No\./i.test(line))return;const c=raw.split("\t").map(function(x){return x.trim();});if(c.length<7||!/^[0-9]+$/.test(c[0]))return;const cycleTime=Number(c[3]),quantity=Number(c[6]);if(!Number.isFinite(cycleTime)||!Number.isFinite(quantity))return;out.push({id:out.length,mc:mc,no:Number(c[0]),mmptNo:c[1],description:c[2],cycleTime:cycleTime,model:c[4],package:c[5],quantity:quantity});});return out;}
-function compareMc(a,b){return Number(String(a).replace(/\D/g,""))-Number(String(b).replace(/\D/g,""));}function styleFor(key){const i=Math.abs(String(key).split("").reduce(function(s,ch){return s+ch.charCodeAt(0);},0))%palette.length;return {start:palette[i][0],end:palette[i][1],border:palette[i][2]};}
-const thaiKeyboardMap={"ๅ":"1","/":"2","-":"3","ภ":"4","ถ":"5","ุ":"6","ึ":"7","ค":"8","ต":"9","จ":"0","ข":"-","ช":"=","+":"1","๑":"2","๒":"3","๓":"4","๔":"5","ู":"6","฿":"7","๕":"8","๖":"9","๗":"0","๘":"-","๙":"=","ๆ":"Q","๐":"Q","ไ":"W","\"":"W","ำ":"E","ฎ":"E","พ":"R","ฑ":"R","ะ":"T","ธ":"T","ั":"Y","ํ":"Y","ี":"U","๊":"U","ร":"I","ณ":"I","น":"O","ฯ":"O","ย":"P","ญ":"P","บ":"[","ฐ":"[","ล":"]",",":"]","ฃ":"\\","ฅ":"\\","ฟ":"A","ฤ":"A","ห":"S","ฆ":"S","ก":"D","ฏ":"D","ด":"F","โ":"F","เ":"G","ฌ":"G","้":"H","็":"H","่":"J","๋":"J","า":"K","ษ":"K","ส":"L","ศ":"L","ว":";","ซ":";","ง":"'","ผ":"Z","(":"Z","ป":"X",")":"X","แ":"C","ฉ":"C","อ":"V","ฮ":"V","ิ":"B","ฺ":"B","ื":"N","์":"N","ท":"M","?":"M","ม":",","ฒ":",","ใ":".","ฬ":".","ฝ":"/","ฦ":"/"};
-function thaiKeyboardToEnglish(value){return String(value||"").split("").map(function(ch){return thaiKeyboardMap[ch]||ch;}).join("");}
-function normalizeCode(v){return String(v||"").trim().toUpperCase().replace(/[^A-Z0-9]/g,"");}
-function normalizeText(v){return String(v||"").toUpperCase().replace(/[^A-Z0-9]+/g," ").trim();}
-function scanCandidates(value){const sources=[String(value||"").toUpperCase(),thaiKeyboardToEnglish(value).toUpperCase()],out=[],seen={};function add(v){const code=normalizeCode(v);if(code&&!seen[code]){seen[code]=true;out.push(code);}}sources.forEach(function(raw){const parts=raw.split(/[\s\r\n]+/).map(function(x){return x.trim();}).filter(Boolean);parts.forEach(function(part){add(part);if(part.includes("-"))add(part.split("-")[0]);const m=part.match(/[A-Z]{1,3}\d{6,}/);if(m)add(m[0]);});add(raw);});return out;}
-function expandMmptCodes(value){const raw=String(value||"").toUpperCase(),parts=raw.split(/[\s,\/-]+/).map(function(x){return x.trim();}).filter(Boolean),codes=[],seen={};let lastFull="";function add(code){code=normalizeCode(code);if(code&&!seen[code]){seen[code]=true;codes.push(code);}}add(raw);parts.forEach(function(part){let code=part;if(/^[0-9]+$/.test(part)&&lastFull){const prefix=lastFull.slice(0,Math.max(0,lastFull.length-part.length));code=prefix+part;}add(code);if(/[A-Z]/.test(code))lastFull=normalizeCode(code);});return codes;}
-function setStatus(text,type){els.scanStatus.textContent=text;els.scanStatus.className="status"+(type?" "+type:"");}
-function findCatalogByCode(value){const key=normalizeCode(value);return masterCatalog.find(function(c){return c.entityType==="PART"&&normalizeCode(c.entityCode)===key;});}
-function findMapping(value){const candidates=scanCandidates(value);for(const key of candidates){const mapping=qrMappings.find(function(m){return m.isActive!==false&&(normalizeCode(m.qrValue)===key||normalizeCode(m.entityCode)===key);});if(mapping)return mapping;const catalog=findCatalogByCode(key);if(catalog)return {qrValue:catalog.entityCode,entityType:catalog.entityType,entityId:catalog.id,entityCode:catalog.entityCode,entityName:catalog.entityName,isActive:true};const record=records.find(function(r){return expandMmptCodes(r.mmptNo).some(function(mmpt){return mmpt===key;});});if(record)return {qrValue:key,entityType:"PART",entityId:key,entityCode:key,entityName:record.description,isActive:true};}return null;}
-function matchingRecords(mapping){const candidates=[mapping.entityCode,mapping.qrValue].map(normalizeCode).filter(Boolean),codeMatches=records.filter(function(r){const mmpts=expandMmptCodes(r.mmptNo);return candidates.some(function(code){return mmpts.some(function(mmpt){return mmpt===code||mmpt.includes(code)||code.includes(mmpt);});});});if(codeMatches.length)return codeMatches;const nameTokens=normalizeText(mapping.entityName).split(/\s+/).filter(function(t){return t.length>2&&!["ASM","ASSY","PART","INJ"].includes(t);});if(!nameTokens.length)return [];return records.filter(function(r){const desc=normalizeText(r.description);const score=nameTokens.reduce(function(s,t){return s+(desc.includes(t)?1:0);},0);return score>=Math.min(3,nameTokens.length);});}
-function addScannedPart(value){const mapping=findMapping(value);if(!mapping){setStatus("ไม่พบ Part Tag: "+value,"bad");return}const matches=matchingRecords(mapping);if(!matches.length){setStatus("พบ Part แต่ไม่มี MC/Cycle time: "+mapping.entityCode,"bad");return}matches.forEach(function(r){const key=r.id+"-"+Date.now()+"-"+Math.random().toString(16).slice(2);planned[key]={selected:true,recordId:r.id,quantity:"",startDate:els.defaultStartDate.value,startTime:els.defaultStartTime.value,qrValue:mapping.qrValue,entityCode:mapping.entityCode,entityName:mapping.entityName};});renderParts();savePlannerState();setStatus("เพิ่ม "+mapping.entityCode+" : "+matches.length+" รายการ","ok");}
-function plannedEndText(p,r){const q=Number(p.quantity),start=parseDateTime(p.startTime||els.defaultStartTime.value,p.startDate||els.defaultStartDate.value);if(!start||!Number.isFinite(q)||q<=0)return "";const end=new Date(start.getTime()+Math.max(1,Math.ceil(r.cycleTime*Math.floor(q)/60))*60000);return timeText(end);}
-function renderParts(){const rows=Object.entries(planned);if(!rows.length){els.partRows.innerHTML="<tr><td colspan=\"12\">ยังไม่มีรายการที่สแกน</td></tr>";renderPlanSummary();return}els.partRows.innerHTML=rows.map(function(entry){const key=entry[0],p=entry[1],r=records.find(function(x){return x.id===p.recordId;});if(!r)return "";return "<tr data-key=\""+key+"\"><td>"+esc(r.mc)+"</td><td>"+esc(r.mmptNo)+"</td><td>"+esc(r.description)+"</td><td>"+r.cycleTime+"</td><td>"+esc(r.model)+"</td><td>"+esc(r.package)+"</td><td>"+r.quantity+"</td><td><input class=\"qty-input\" type=\"number\" min=\"1\" step=\"1\" value=\""+(p.quantity||"")+"\" placeholder=\""+r.quantity+"\"></td><td><input class=\"part-date\" type=\"date\" value=\""+(p.startDate||els.defaultStartDate.value)+"\"></td><td><input class=\"part-time\" type=\"time\" value=\""+(p.startTime||els.defaultStartTime.value)+"\"></td><td><input class=\"part-end-time\" type=\"time\" value=\""+(p.endTime||plannedEndText(p,r))+"\"></td><td><button class=\"remove-row\" type=\"button\">ลบ</button></td></tr>";}).join("");renderPlanSummary();}
-function syncRow(row,target){const key=row.dataset.key,p=planned[key],r=records.find(function(x){return x.id===p.recordId;});if(!p)return;p.quantity=row.querySelector(".qty-input").value.trim();p.startDate=row.querySelector(".part-date").value;p.startTime=row.querySelector(".part-time").value;if(target&&target.classList.contains("part-end-time"))p.endTime=target.value;else if(!p.endTime&&r)row.querySelector(".part-end-time").value=plannedEndText(p,r);renderPlanSummary();savePlannerState();}
-function selectedPlan(){return Object.entries(planned).map(function(entry){const p=entry[1],r=records.find(function(x){return x.id===p.recordId;}),q=Number(p.quantity);if(!r||!Number.isFinite(q)||q<=0||!p.startDate||!p.startTime)return null;return Object.assign({},r,{planQuantity:Math.floor(q),startDate:p.startDate,startTime:p.startTime,endTime:p.endTime||plannedEndText(p,r),qrValue:p.qrValue,entityCode:p.entityCode,entityName:p.entityName});});}
-function renderPlanSummary(){const valid=selectedPlan().filter(Boolean),total=valid.reduce(function(s,r){return s+Math.max(1,Math.ceil(r.cycleTime*r.planQuantity/60));},0);els.planSummary.innerHTML="<span>สแกนแล้ว: "+Object.keys(planned).length+" รายการ</span><span>พร้อมสร้าง: "+valid.length+" งาน</span><span>เวลาคำนวณรวม: "+(total>=60?Math.floor(total/60)+"h "+total%60+"m":total+"m")+"</span>";}function parseDateTime(time,date){const m=String(date+" "+time).match(/(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})/);return m?new Date(Number(m[1]),Number(m[2])-1,Number(m[3]),Number(m[4]),Number(m[5])):null;}function dateKey(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");}function timeText(d){return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");}function fmtMin(v){return String(Math.floor(v/60)).padStart(2,"0")+":"+String(v%60).padStart(2,"0");}function dayLabel(k){return k.slice(-2)+"-"+["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][Number(k.slice(5,7))-1];}
-function buildTimeline(){const plan=selectedPlan();if(plan.some(function(x){return x===null;})){alert("กรุณากรอก Plan Qty และเวลาเริ่มฉีดของทุก Part ที่เลือก");return}if(!plan.length){alert("กรุณาเลือก Part ก่อน");return}tasks=plan.map(function(r,i){const start=parseDateTime(r.startTime,r.startDate);if(!start)return null;const startMin=start.getHours()*60+start.getMinutes(),autoDuration=Math.max(1,Math.ceil(r.cycleTime*r.planQuantity/60));let endMin=startMin+autoDuration;if(r.endTime){const e=String(r.endTime).match(/(\d{1,2}):(\d{2})/);if(e){endMin=Number(e[1])*60+Number(e[2]);if(endMin<=startMin)endMin+=1440;}}const durationMin=Math.max(1,endMin-startMin);return {id:i,name:r.description+" | "+r.mmptNo+" | "+r.planQuantity+" pcs",mc:r.mc,date:dateKey(start),startMin:startMin,endMin:endMin,durationMin:durationMin,startText:timeText(start),endText:fmtMin(endMin),meta:r};}).filter(Boolean);rebuildTimelineFilters();renderTimeline();switchView("timelineView");}
-function rebuildTimelineFilters(){days=[...new Set(tasks.map(function(t){return t.date;}))].sort();mcs=[...new Set(tasks.map(function(t){return t.mc;}))].sort(compareMc);els.dayFilter.innerHTML="<option value=\"all\">ทุกวัน</option>"+days.map(function(d){return "<option value=\""+d+"\">"+dayLabel(d)+"</option>";}).join("");els.mcTimelineFilter.innerHTML="<option value=\"all\">ทุก MC</option>"+mcs.map(function(mc){return "<option>"+esc(mc)+"</option>";}).join("");els.showMc.innerHTML="<span class=\"hint\">Show MC</span>"+mcs.map(function(mc){return "<label><input type=\"checkbox\" value=\""+esc(mc)+"\" checked> "+esc(mc)+"</label>";}).join("");}
-function shownMcs(){return [...els.showMc.querySelectorAll("input:checked")].map(function(x){return x.value;});}function filteredTasks(){const d=els.dayFilter.value,mc=els.mcTimelineFilter.value,q=els.timelineSearch.value.trim().toLowerCase(),shown=shownMcs();return tasks.filter(function(t){return (d==="all"||t.date===d)&&(mc==="all"||t.mc===mc)&&(!shown.length||shown.includes(t.mc))&&(!q||(t.name+" "+t.mc).toLowerCase().includes(q));});}
-function assignLanes(rows){const lanes=[];return rows.slice().sort(function(a,b){return a.startMin-b.startMin||b.durationMin-a.durationMin;}).map(function(t){let lane=lanes.findIndex(function(end){return t.startMin>=end;});if(lane===-1){lane=lanes.length;lanes.push(0)}lanes[lane]=t.endMin;return Object.assign({},t,{lane:lane});});}
-function renderTimeline(){const visible=filteredTasks(),groups=days.filter(function(d){return els.dayFilter.value==="all"||d===els.dayFilter.value;}).map(function(d){return {date:d,tasks:assignLanes(visible.filter(function(t){return t.date===d;}))};}).filter(function(g){return g.tasks.length;});els.chart.innerHTML=groups.length?"":"<div class=\"empty\">ไม่พบข้อมูลตามเงื่อนไข</div>";groups.forEach(renderDay);renderStats(visible);renderLegend(visible);renderDetails(visible);}
-function renderDay(g){const maxLane=Math.max(...g.tasks.map(function(t){return t.lane;}),0),height=22+(maxLane+1)*38,total=g.tasks.reduce(function(s,t){return s+t.durationMin;},0),row=document.createElement("div"),label=document.createElement("div"),tl=document.createElement("div");row.className="day-row";label.className="day-label";label.style.minHeight=height+"px";label.innerHTML="<strong>"+dayLabel(g.date)+"</strong><span>"+g.tasks.length+" jobs</span><span>"+total+" min</span>";tl.className="timeline";tl.style.minHeight=height+"px";g.tasks.forEach(function(t){const s=styleFor(t.id+"-"+t.meta.mmptNo+"-"+t.startText),bar=document.createElement("div");bar.className="bar";bar.style.left=(t.startMin/1440*100)+"%";bar.style.width=Math.max(t.durationMin/1440*100,.8)+"%";bar.style.top=(10+t.lane*38)+"px";bar.style.background="linear-gradient(180deg,"+s.start+","+s.end+")";bar.style.borderColor=s.border;bar.title=t.name+"\n"+t.mc+"\n"+t.startText+"-"+t.endText+" ("+t.durationMin+"m)";bar.innerHTML="<small>"+esc(t.mc)+"</small><span>"+t.startText+" "+esc(t.name)+"</span>";tl.appendChild(bar);});row.append(label,tl);els.chart.appendChild(row);}
-function renderStats(rows){const total=rows.reduce(function(s,t){return s+t.durationMin;},0),longest=rows.reduce(function(m,t){return Math.max(m,t.durationMin);},0);els.taskCount.textContent=rows.length;els.totalMinutes.textContent=total>=60?Math.floor(total/60)+"h "+total%60+"m":total+"m";els.longestTask.textContent=longest+"m";}function renderLegend(rows){els.legend.innerHTML=rows.map(function(t){const s=styleFor(t.id+"-"+t.meta.mmptNo+"-"+t.startText);return "<span class=\"key\"><i class=\"swatch\" style=\"background:linear-gradient(180deg,"+s.start+","+s.end+");border-color:"+s.border+"\"></i>"+esc(t.mc)+" "+esc(t.meta.mmptNo)+"</span>";}).join("");}
-function renderDetails(rows){if(!rows.length){els.detailRows.innerHTML="<tr><td colspan=\"11\">ยังไม่มี Timeline</td></tr>";return}els.detailRows.innerHTML=rows.slice().sort(function(a,b){return a.date.localeCompare(b.date)||a.startMin-b.startMin;}).map(function(t){return "<tr><td>"+dayLabel(t.date)+"</td><td>"+esc(t.mc)+"</td><td>"+esc(t.meta.mmptNo)+"</td><td>"+esc(t.meta.description)+"</td><td>"+t.startText+"</td><td>"+t.endText+"</td><td>"+t.durationMin+"</td><td>"+t.meta.cycleTime+"</td><td>"+t.meta.planQuantity+"</td><td>"+esc(t.meta.model)+"</td><td>"+esc(t.meta.package)+"</td></tr>";}).join("");}
-function buildHours(){els.hours.innerHTML="";for(let h=0;h<=24;h+=2){const d=document.createElement("div");d.className="hour-label";d.style.left=(h/24*100)+"%";d.textContent=String(h).padStart(2,"0")+":00";els.hours.appendChild(d)}}function switchView(id){document.querySelectorAll(".view").forEach(function(v){v.classList.toggle("active",v.id===id);});document.querySelectorAll(".tab").forEach(function(b){b.classList.toggle("active",b.dataset.view===id);});}
-document.querySelectorAll(".tab").forEach(function(b){b.addEventListener("click",function(){switchView(b.dataset.view);});});els.scanInput.addEventListener("keydown",function(e){if(e.key!=="Enter")return;e.preventDefault();const value=els.scanInput.value.trim();if(!value)return;addScannedPart(value);els.scanInput.value="";els.scanInput.focus();});els.partRows.addEventListener("input",function(e){const row=e.target.closest("tr[data-key]");if(row)syncRow(row,e.target);});els.partRows.addEventListener("change",function(e){const row=e.target.closest("tr[data-key]");if(row)syncRow(row,e.target);});els.partRows.addEventListener("click",function(e){if(!e.target.classList.contains("remove-row"))return;const row=e.target.closest("tr[data-key]");if(row){delete planned[row.dataset.key];renderParts();savePlannerState();}});els.masterSearch.addEventListener("input",renderMasterRows);els.addMasterRow.addEventListener("click",addMasterRecord);els.saveMasterRows.addEventListener("click",saveMasterRecords);els.masterRows.addEventListener("input",function(e){const row=e.target.closest("tr[data-id]");if(row)syncMasterRow(row);});els.masterRows.addEventListener("click",function(e){if(!e.target.classList.contains("delete-master"))return;const row=e.target.closest("tr[data-id]"),id=Number(row.dataset.id);records=records.filter(function(r){return r.id!==id;});renderMasterRows();saveMasterLocal();setMasterStatus("ลบแถวแล้ว กดบันทึก Master เพื่อส่งขึ้น server","");});els.clearSelected.addEventListener("click",function(){planned={};renderParts();tasks=[];renderTimeline();savePlannerState();els.scanInput.focus();});els.defaultStartDate.addEventListener("change",savePlannerState);els.defaultStartTime.addEventListener("change",savePlannerState);els.saveHistory.addEventListener("click",saveCurrentToHistory);els.loadHistory.addEventListener("click",loadSelectedHistory);els.deleteHistory.addEventListener("click",deleteSelectedHistory);els.goTimeline.addEventListener("click",buildTimeline);els.buildTimeline.addEventListener("click",buildTimeline);els.showAll.addEventListener("click",function(){els.dayFilter.value="all";els.mcTimelineFilter.value="all";els.timelineSearch.value="";els.showMc.querySelectorAll("input").forEach(function(i){i.checked=true;});renderTimeline();});els.dayFilter.addEventListener("change",renderTimeline);els.mcTimelineFilter.addEventListener("change",renderTimeline);els.timelineSearch.addEventListener("input",renderTimeline);els.showMc.addEventListener("change",renderTimeline);els.printPage.addEventListener("click",function(){window.print();});(async function init(){await loadMasterRecords();await loadPlannerState();await renderHistoryOptions();renderMasterRows();renderParts();buildHours();els.scanInput.focus();})();
-</script>
+
+    function esc(value) {
+      return String(value).replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#39;'
+      }[char]));
+    }
+
+    function cloneData(value) {
+      return JSON.parse(JSON.stringify(value));
+    }
+
+    function normalizeCode(value) {
+      return String(value || '').trim().toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+
+    function normalizeText(value) {
+      return String(value || '').toUpperCase().replace(/[^A-Z0-9]+/g, ' ').trim();
+    }
+
+    function compareMc(a, b) {
+      return Number(String(a).replace(/\D/g, '')) - Number(String(b).replace(/\D/g, ''));
+    }
+
+    function dateKey(date) {
+      return [
+        date.getFullYear(),
+        String(date.getMonth() + 1).padStart(2, '0'),
+        String(date.getDate()).padStart(2, '0')
+      ].join('-');
+    }
+
+    function timeText(date) {
+      return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+    }
+
+    function fmtMin(minutes) {
+      return `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+    }
+
+    function dayLabel(key) {
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+      return `${key.slice(-2)}-${months[Number(key.slice(5, 7)) - 1]}`;
+    }
+
+    function parseDateTime(time, date) {
+      const match = String(`${date} ${time}`).match(/(\d{4})-(\d{1,2})-(\d{1,2})\s+(\d{1,2}):(\d{2})/);
+      if (!match) return null;
+
+      return new Date(
+        Number(match[1]),
+        Number(match[2]) - 1,
+        Number(match[3]),
+        Number(match[4]),
+        Number(match[5])
+      );
+    }
+
+    function styleFor(key) {
+      const index = Math.abs(String(key).split('').reduce((sum, char) => sum + char.charCodeAt(0), 0)) % palette.length;
+      return {
+        start: palette[index][0],
+        end: palette[index][1],
+        border: palette[index][2]
+      };
+    }
+
+    /* =========================================================
+       3) State / Storage
+       ========================================================= */
+    function currentPlannerState() {
+      return {
+        planned,
+        defaultStartDate: els.defaultStartDate.value,
+        defaultStartTime: els.defaultStartTime.value
+      };
+    }
+
+    function applyPlannerState(saved) {
+      if (!saved) return;
+      if (saved.defaultStartDate) els.defaultStartDate.value = saved.defaultStartDate;
+      if (saved.defaultStartTime) els.defaultStartTime.value = saved.defaultStartTime;
+      if (saved.planned && typeof saved.planned === 'object') planned = saved.planned;
+    }
+
+    function savePlannerState() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentPlannerState()));
+      } catch (error) {
+        console.warn('Cannot save planner state:', error);
+      }
+    }
+
+    function loadPlannerState() {
+      try {
+        applyPlannerState(JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'));
+      } catch (error) {
+        planned = {};
+      }
+    }
+
+    /* =========================================================
+       4) Master Data
+       ========================================================= */
+    function normalizeRecord(record, index = 0) {
+      return {
+        id: Number.isFinite(Number(record.id)) ? Number(record.id) : index,
+        mc: String(record.mc || '').trim().toUpperCase(),
+        no: Number(record.no) || index + 1,
+        mmptNo: String(record.mmptNo || '').trim(),
+        description: String(record.description || '').trim(),
+        cycleTime: Number(record.cycleTime) || 0,
+        model: String(record.model || '').trim(),
+        package: String(record.package || '').trim(),
+        quantity: Number(record.quantity) || 0
+      };
+    }
+
+    function saveMasterLocal() {
+      try {
+        localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(records));
+      } catch (error) {
+        console.warn('Cannot save master data:', error);
+      }
+    }
+
+    function loadMasterRecords() {
+      try {
+        const local = JSON.parse(localStorage.getItem(MASTER_STORAGE_KEY) || 'null');
+        if (Array.isArray(local) && local.length) {
+          records = local.map(normalizeRecord);
+        }
+      } catch (error) {
+        console.warn('Cannot load local master data:', error);
+      }
+    }
+
+    function setMasterStatus(text, type = '') {
+      els.masterStatus.textContent = text;
+      els.masterStatus.className = `status${type ? ` ${type}` : ''}`;
+    }
+
+    function renderMasterRows() {
+      const query = (els.masterSearch.value || '').trim().toLowerCase();
+      const rows = records.filter((record) => {
+        const haystack = `${record.mc} ${record.mmptNo} ${record.description} ${record.model} ${record.package}`.toLowerCase();
+        return !query || haystack.includes(query);
+      });
+
+      els.masterRows.innerHTML = rows.length
+        ? rows.map(renderMasterRow).join('')
+        : '<tr><td colspan="8">ไม่พบ Master Data</td></tr>';
+    }
+
+    function renderMasterRow(record) {
+      return `
+        <tr data-id="${record.id}">
+          <td><input class="master-mc" value="${esc(record.mc)}"></td>
+          <td><input class="master-mmpt" value="${esc(record.mmptNo)}"></td>
+          <td><input class="master-desc" value="${esc(record.description)}"></td>
+          <td><input class="master-cycle" type="number" min="0" step="0.1" value="${record.cycleTime}"></td>
+          <td><input class="master-model" value="${esc(record.model)}"></td>
+          <td><input class="master-package" value="${esc(record.package)}"></td>
+          <td><input class="master-qty" type="number" min="0" step="1" value="${record.quantity}"></td>
+          <td><button class="delete-master" type="button">ลบ</button></td>
+        </tr>`;
+    }
+
+    function syncMasterRow(row) {
+      const id = Number(row.dataset.id);
+      const record = records.find((item) => item.id === id);
+      if (!record) return;
+
+      record.mc = row.querySelector('.master-mc').value.trim().toUpperCase();
+      record.mmptNo = row.querySelector('.master-mmpt').value.trim();
+      record.description = row.querySelector('.master-desc').value.trim();
+      record.cycleTime = Number(row.querySelector('.master-cycle').value) || 0;
+      record.model = row.querySelector('.master-model').value.trim();
+      record.package = row.querySelector('.master-package').value.trim();
+      record.quantity = Number(row.querySelector('.master-qty').value) || 0;
+
+      saveMasterLocal();
+    }
+
+    function addMasterRecord() {
+      const nextId = records.reduce((max, record) => Math.max(max, Number(record.id) || 0), 0) + 1;
+
+      records.unshift({
+        id: nextId,
+        mc: 'MC',
+        no: nextId,
+        mmptNo: '',
+        description: '',
+        cycleTime: 0,
+        model: '',
+        package: '',
+        quantity: 0
+      });
+
+      renderMasterRows();
+      setMasterStatus('เพิ่มแถวใหม่แล้ว กรุณากรอกข้อมูลแล้วกดบันทึก Master');
+    }
+
+    function saveMasterRecords() {
+      const valid = records
+        .map(normalizeRecord)
+        .filter((record) => record.mc && record.mmptNo && record.description && record.cycleTime > 0 && record.quantity > 0);
+
+      if (!valid.length) {
+        setMasterStatus('ไม่มี Master ที่บันทึกได้', 'bad');
+        return;
+      }
+
+      records = valid;
+      saveMasterLocal();
+      renderMasterRows();
+      renderParts();
+      setMasterStatus(`บันทึก Master แล้ว: ${records.length} รายการ`, 'ok');
+    }
+
+    /* =========================================================
+       5) QR / Part Matching
+       ========================================================= */
+    function expandMmptCodes(value) {
+      const raw = String(value || '').toUpperCase();
+      const parts = raw.split(/[\s,\/-]+/).map((part) => part.trim()).filter(Boolean);
+      const codes = [];
+      const seen = {};
+      let lastFull = '';
+
+      function add(code) {
+        const normalized = normalizeCode(code);
+        if (normalized && !seen[normalized]) {
+          seen[normalized] = true;
+          codes.push(normalized);
+        }
+      }
+
+      add(raw);
+
+      parts.forEach((part) => {
+        let code = part;
+
+        if (/^[0-9]+$/.test(part) && lastFull) {
+          const prefix = lastFull.slice(0, Math.max(0, lastFull.length - part.length));
+          code = prefix + part;
+        }
+
+        add(code);
+        if (/[A-Z]/.test(code)) lastFull = normalizeCode(code);
+      });
+
+      return codes;
+    }
+
+    function scanCandidates(value) {
+      const raw = String(value || '').toUpperCase();
+      const output = [];
+      const seen = {};
+
+      function add(valueToAdd) {
+        const code = normalizeCode(valueToAdd);
+        if (code && !seen[code]) {
+          seen[code] = true;
+          output.push(code);
+        }
+      }
+
+      raw.split(/[\s\r\n]+/).map((part) => part.trim()).filter(Boolean).forEach((part) => {
+        add(part);
+        if (part.includes('-')) add(part.split('-')[0]);
+
+        const matchedCode = part.match(/[A-Z]{1,3}\d{6,}/);
+        if (matchedCode) add(matchedCode[0]);
+      });
+
+      add(raw);
+      return output;
+    }
+
+    function findMapping(value) {
+      const candidates = scanCandidates(value);
+
+      for (const code of candidates) {
+        const mapping = qrMappings.find((item) => {
+          return item.isActive !== false && (
+            normalizeCode(item.qrValue) === code ||
+            normalizeCode(item.entityCode) === code
+          );
+        });
+
+        if (mapping) return mapping;
+
+        const record = records.find((item) => expandMmptCodes(item.mmptNo).some((mmpt) => mmpt === code));
+        if (record) {
+          return {
+            qrValue: code,
+            entityType: 'PART',
+            entityId: code,
+            entityCode: code,
+            entityName: record.description,
+            isActive: true
+          };
+        }
+      }
+
+      return null;
+    }
+
+    function matchingRecords(mapping) {
+      const candidates = [mapping.entityCode, mapping.qrValue].map(normalizeCode).filter(Boolean);
+
+      const codeMatches = records.filter((record) => {
+        const mmpts = expandMmptCodes(record.mmptNo);
+        return candidates.some((code) => mmpts.some((mmpt) => mmpt === code || mmpt.includes(code) || code.includes(mmpt)));
+      });
+
+      if (codeMatches.length) return codeMatches;
+
+      const nameTokens = normalizeText(mapping.entityName)
+        .split(/\s+/)
+        .filter((token) => token.length > 2 && !['ASM', 'ASSY', 'PART', 'INJ'].includes(token));
+
+      if (!nameTokens.length) return [];
+
+      return records.filter((record) => {
+        const description = normalizeText(record.description);
+        const score = nameTokens.reduce((sum, token) => sum + (description.includes(token) ? 1 : 0), 0);
+        return score >= Math.min(3, nameTokens.length);
+      });
+    }
+
+    function addScannedPart(value) {
+      const mapping = findMapping(value);
+      if (!mapping) {
+        setScanStatus(`ไม่พบ Part Tag: ${value}`, 'bad');
+        return;
+      }
+
+      const matches = matchingRecords(mapping);
+      if (!matches.length) {
+        setScanStatus(`พบ Part แต่ไม่มี MC/Cycle time: ${mapping.entityCode}`, 'bad');
+        return;
+      }
+
+      matches.forEach((record) => {
+        const key = `${record.id}-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        planned[key] = {
+          selected: true,
+          recordId: record.id,
+          quantity: '',
+          startDate: els.defaultStartDate.value,
+          startTime: els.defaultStartTime.value,
+          qrValue: mapping.qrValue,
+          entityCode: mapping.entityCode,
+          entityName: mapping.entityName
+        };
+      });
+
+      renderParts();
+      savePlannerState();
+      setScanStatus(`เพิ่ม ${mapping.entityCode}: ${matches.length} รายการ`, 'ok');
+    }
+
+    function setScanStatus(text, type = '') {
+      els.scanStatus.textContent = text;
+      els.scanStatus.className = `status${type ? ` ${type}` : ''}`;
+    }
+
+    /* =========================================================
+       6) Plan / Selector Rendering
+       ========================================================= */
+    function plannedEndText(plan, record) {
+      const qty = Number(plan.quantity);
+      const start = parseDateTime(plan.startTime || els.defaultStartTime.value, plan.startDate || els.defaultStartDate.value);
+
+      if (!start || !Number.isFinite(qty) || qty <= 0) return '';
+
+      const minutes = Math.max(1, Math.ceil((record.cycleTime * Math.floor(qty)) / 60));
+      const end = new Date(start.getTime() + minutes * 60000);
+      return timeText(end);
+    }
+
+    function selectedPlan() {
+      return Object.entries(planned).map(([, plan]) => {
+        const record = records.find((item) => item.id === plan.recordId);
+        const qty = Number(plan.quantity);
+
+        if (!record || !Number.isFinite(qty) || qty <= 0 || !plan.startDate || !plan.startTime) {
+          return null;
+        }
+
+        return {
+          ...record,
+          planQuantity: Math.floor(qty),
+          startDate: plan.startDate,
+          startTime: plan.startTime,
+          endTime: plan.endTime || plannedEndText(plan, record),
+          qrValue: plan.qrValue,
+          entityCode: plan.entityCode,
+          entityName: plan.entityName
+        };
+      });
+    }
+
+    function renderParts() {
+      const rows = Object.entries(planned);
+
+      if (!rows.length) {
+        els.partRows.innerHTML = '<tr><td colspan="12">ยังไม่มีรายการที่สแกน</td></tr>';
+        renderPlanSummary();
+        return;
+      }
+
+      els.partRows.innerHTML = rows.map(renderPartRow).join('');
+      renderPlanSummary();
+    }
+
+    function renderPartRow([key, plan]) {
+      const record = records.find((item) => item.id === plan.recordId);
+      if (!record) return '';
+
+      return `
+        <tr data-key="${key}">
+          <td>${esc(record.mc)}</td>
+          <td>${esc(record.mmptNo)}</td>
+          <td>${esc(record.description)}</td>
+          <td>${record.cycleTime}</td>
+          <td>${esc(record.model)}</td>
+          <td>${esc(record.package)}</td>
+          <td>${record.quantity}</td>
+          <td><input class="qty-input" type="number" min="1" step="1" value="${plan.quantity || ''}" placeholder="${record.quantity}"></td>
+          <td><input class="part-date" type="date" value="${plan.startDate || els.defaultStartDate.value}"></td>
+          <td><input class="part-time" type="time" value="${plan.startTime || els.defaultStartTime.value}"></td>
+          <td><input class="part-end-time" type="time" value="${plan.endTime || plannedEndText(plan, record)}"></td>
+          <td><button class="remove-row" type="button">ลบ</button></td>
+        </tr>`;
+    }
+
+    function syncPartRow(row, target) {
+      const key = row.dataset.key;
+      const plan = planned[key];
+      const record = records.find((item) => item.id === plan.recordId);
+
+      if (!plan) return;
+
+      plan.quantity = row.querySelector('.qty-input').value.trim();
+      plan.startDate = row.querySelector('.part-date').value;
+      plan.startTime = row.querySelector('.part-time').value;
+
+      if (target && target.classList.contains('part-end-time')) {
+        plan.endTime = target.value;
+      } else if (!plan.endTime && record) {
+        row.querySelector('.part-end-time').value = plannedEndText(plan, record);
+      }
+
+      renderPlanSummary();
+      savePlannerState();
+    }
+
+    function renderPlanSummary() {
+      const valid = selectedPlan().filter(Boolean);
+      const total = valid.reduce((sum, record) => {
+        return sum + Math.max(1, Math.ceil((record.cycleTime * record.planQuantity) / 60));
+      }, 0);
+
+      els.planSummary.innerHTML = `
+        <span>สแกนแล้ว: ${Object.keys(planned).length} รายการ</span>
+        <span>พร้อมสร้าง: ${valid.length} งาน</span>
+        <span>เวลาคำนวณรวม: ${total >= 60 ? `${Math.floor(total / 60)}h ${total % 60}m` : `${total}m`}</span>`;
+    }
+
+    /* =========================================================
+       7) Timeline
+       ========================================================= */
+    function buildTimeline() {
+      const plan = selectedPlan();
+
+      if (plan.some((item) => item === null)) {
+        alert('กรุณากรอก Plan Qty และเวลาเริ่มฉีดของทุก Part ที่เลือก');
+        return;
+      }
+
+      if (!plan.length) {
+        alert('กรุณาเลือก Part ก่อน');
+        return;
+      }
+
+      tasks = plan.map(createTimelineTask).filter(Boolean);
+      rebuildTimelineFilters();
+      renderTimeline();
+      switchView('timelineView');
+    }
+
+    function createTimelineTask(record, index) {
+      const start = parseDateTime(record.startTime, record.startDate);
+      if (!start) return null;
+
+      const startMin = start.getHours() * 60 + start.getMinutes();
+      const autoDuration = Math.max(1, Math.ceil((record.cycleTime * record.planQuantity) / 60));
+      let endMin = startMin + autoDuration;
+
+      if (record.endTime) {
+        const matchedEnd = String(record.endTime).match(/(\d{1,2}):(\d{2})/);
+        if (matchedEnd) {
+          endMin = Number(matchedEnd[1]) * 60 + Number(matchedEnd[2]);
+          if (endMin <= startMin) endMin += 1440;
+        }
+      }
+
+      const durationMin = Math.max(1, endMin - startMin);
+
+      return {
+        id: index,
+        name: `${record.description} | ${record.mmptNo} | ${record.planQuantity} pcs`,
+        mc: record.mc,
+        date: dateKey(start),
+        startMin,
+        endMin,
+        durationMin,
+        startText: timeText(start),
+        endText: fmtMin(endMin),
+        meta: record
+      };
+    }
+
+    function rebuildTimelineFilters() {
+      days = [...new Set(tasks.map((task) => task.date))].sort();
+      mcs = [...new Set(tasks.map((task) => task.mc))].sort(compareMc);
+
+      els.dayFilter.innerHTML = '<option value="all">ทุกวัน</option>' + days
+        .map((day) => `<option value="${day}">${dayLabel(day)}</option>`)
+        .join('');
+
+      els.mcTimelineFilter.innerHTML = '<option value="all">ทุก MC</option>' + mcs
+        .map((mc) => `<option>${esc(mc)}</option>`)
+        .join('');
+
+      els.showMc.innerHTML = '<span class="hint">Show MC</span>' + mcs
+        .map((mc) => `<label><input type="checkbox" value="${esc(mc)}" checked> ${esc(mc)}</label>`)
+        .join('');
+    }
+
+    function shownMcs() {
+      return [...els.showMc.querySelectorAll('input:checked')].map((input) => input.value);
+    }
+
+    function filteredTasks() {
+      const day = els.dayFilter.value;
+      const mc = els.mcTimelineFilter.value;
+      const query = els.timelineSearch.value.trim().toLowerCase();
+      const shown = shownMcs();
+
+      return tasks.filter((task) => {
+        return (day === 'all' || task.date === day) &&
+          (mc === 'all' || task.mc === mc) &&
+          (!shown.length || shown.includes(task.mc)) &&
+          (!query || `${task.name} ${task.mc}`.toLowerCase().includes(query));
+      });
+    }
+
+    function assignLanes(rows) {
+      const lanes = [];
+
+      return rows
+        .slice()
+        .sort((a, b) => a.startMin - b.startMin || b.durationMin - a.durationMin)
+        .map((task) => {
+          let lane = lanes.findIndex((end) => task.startMin >= end);
+
+          if (lane === -1) {
+            lane = lanes.length;
+            lanes.push(0);
+          }
+
+          lanes[lane] = task.endMin;
+          return { ...task, lane };
+        });
+    }
+
+    function renderTimeline() {
+      const visible = filteredTasks();
+      const groups = days
+        .filter((day) => els.dayFilter.value === 'all' || day === els.dayFilter.value)
+        .map((day) => ({ date: day, tasks: assignLanes(visible.filter((task) => task.date === day)) }))
+        .filter((group) => group.tasks.length);
+
+      els.chart.innerHTML = groups.length ? '' : '<div class="empty">ไม่พบข้อมูลตามเงื่อนไข</div>';
+      groups.forEach(renderDay);
+
+      renderStats(visible);
+      renderLegend(visible);
+      renderDetails(visible);
+    }
+
+    function renderDay(group) {
+      const maxLane = Math.max(...group.tasks.map((task) => task.lane), 0);
+      const height = 22 + (maxLane + 1) * 38;
+      const total = group.tasks.reduce((sum, task) => sum + task.durationMin, 0);
+
+      const row = document.createElement('div');
+      const label = document.createElement('div');
+      const timeline = document.createElement('div');
+
+      row.className = 'day-row';
+      label.className = 'day-label';
+      label.style.minHeight = `${height}px`;
+      label.innerHTML = `<strong>${dayLabel(group.date)}</strong><span>${group.tasks.length} jobs</span><span>${total} min</span>`;
+
+      timeline.className = 'timeline';
+      timeline.style.minHeight = `${height}px`;
+
+      group.tasks.forEach((task) => timeline.appendChild(createTimelineBar(task)));
+
+      row.append(label, timeline);
+      els.chart.appendChild(row);
+    }
+
+    function createTimelineBar(task) {
+      const style = styleFor(`${task.id}-${task.meta.mmptNo}-${task.startText}`);
+      const bar = document.createElement('div');
+
+      bar.className = 'bar';
+      bar.style.left = `${(task.startMin / 1440) * 100}%`;
+      bar.style.width = `${Math.max((task.durationMin / 1440) * 100, 0.8)}%`;
+      bar.style.top = `${10 + task.lane * 38}px`;
+      bar.style.background = `linear-gradient(180deg, ${style.start}, ${style.end})`;
+      bar.style.borderColor = style.border;
+      bar.title = `${task.name}\n${task.mc}\n${task.startText}-${task.endText} (${task.durationMin}m)`;
+      bar.innerHTML = `<small>${esc(task.mc)}</small><span>${task.startText} ${esc(task.name)}</span>`;
+
+      return bar;
+    }
+
+    function renderStats(rows) {
+      const total = rows.reduce((sum, task) => sum + task.durationMin, 0);
+      const longest = rows.reduce((max, task) => Math.max(max, task.durationMin), 0);
+
+      els.taskCount.textContent = rows.length;
+      els.totalMinutes.textContent = total >= 60 ? `${Math.floor(total / 60)}h ${total % 60}m` : `${total}m`;
+      els.longestTask.textContent = `${longest}m`;
+    }
+
+    function renderLegend(rows) {
+      els.legend.innerHTML = rows.map((task) => {
+        const style = styleFor(`${task.id}-${task.meta.mmptNo}-${task.startText}`);
+        return `
+          <span class="key">
+            <i class="swatch" style="background:linear-gradient(180deg, ${style.start}, ${style.end}); border-color:${style.border}"></i>
+            ${esc(task.mc)} ${esc(task.meta.mmptNo)}
+          </span>`;
+      }).join('');
+    }
+
+    function renderDetails(rows) {
+      if (!rows.length) {
+        detailExportRows = [];
+        els.detailRows.innerHTML = '<tr><td colspan="11">ยังไม่มี Timeline</td></tr>';
+        return;
+      }
+
+      detailExportRows = rows
+        .slice()
+        .sort((a, b) => a.date.localeCompare(b.date) || a.startMin - b.startMin);
+
+      els.detailRows.innerHTML = detailExportRows
+        .map((task) => `
+          <tr>
+            <td>${dayLabel(task.date)}</td>
+            <td>${esc(task.mc)}</td>
+            <td>${esc(task.meta.mmptNo)}</td>
+            <td>${esc(task.meta.description)}</td>
+            <td>${task.startText}</td>
+            <td>${task.endText}</td>
+            <td>${task.durationMin}</td>
+            <td>${task.meta.cycleTime}</td>
+            <td>${task.meta.planQuantity}</td>
+            <td>${esc(task.meta.model)}</td>
+            <td>${esc(task.meta.package)}</td>
+          </tr>`)
+        .join('');
+    }
+
+    function exportDetailsExcel() {
+      if (!detailExportRows.length) {
+        alert('ยังไม่มีข้อมูลรายละเอียดสำหรับ Export');
+        return;
+      }
+
+      const headers = ['Day', 'MC', 'MMPT NO.', 'Part Name', 'Start', 'End', 'Min', 'Cycle', 'Qty', 'Model', 'Package'];
+      const rows = detailExportRows.map((task) => [
+        dayLabel(task.date),
+        task.mc,
+        task.meta.mmptNo,
+        task.meta.description,
+        task.startText,
+        task.endText,
+        task.durationMin,
+        task.meta.cycleTime,
+        task.meta.planQuantity,
+        task.meta.model,
+        task.meta.package
+      ]);
+      const table = `
+        <table border="1">
+          <thead><tr>${headers.map((header) => `<th>${esc(header)}</th>`).join('')}</tr></thead>
+          <tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${esc(cell)}</td>`).join('')}</tr>`).join('')}</tbody>
+        </table>`;
+      const workbook = `<!doctype html><html><head><meta charset="utf-8"></head><body>${table}</body></html>`;
+      const blob = new Blob(['\ufeff', workbook], { type: 'application/vnd.ms-excel;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `mc-production-detail-${dateKey(new Date())}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+    }
+
+    function buildHours() {
+      els.hours.innerHTML = '';
+
+      for (let hour = 0; hour <= 24; hour += 2) {
+        const label = document.createElement('div');
+        label.className = 'hour-label';
+        label.style.left = `${(hour / 24) * 100}%`;
+        label.textContent = `${String(hour).padStart(2, '0')}:00`;
+        els.hours.appendChild(label);
+      }
+    }
+
+    /* =========================================================
+       8) History
+       ========================================================= */
+    function loadHistoryItems() {
+      try {
+        const items = JSON.parse(localStorage.getItem(HISTORY_STORAGE_KEY) || '[]');
+        return Array.isArray(items) ? items : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function saveHistoryItems(items) {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items));
+    }
+
+    function renderHistoryOptions() {
+      const items = loadHistoryItems();
+
+      els.historySelect.innerHTML = items.length
+        ? items.map((item) => `<option value="${esc(item.id)}">${esc(item.name)} (${esc(item.savedAtText)})</option>`).join('')
+        : '<option value="">ยังไม่มีประวัติ</option>';
+    }
+
+    function makeHistoryName() {
+      const now = new Date();
+      const valid = selectedPlan().filter(Boolean);
+      return `Plan ${dateKey(now)} ${timeText(now)} / ${valid.length} jobs`;
+    }
+
+    function saveCurrentToHistory() {
+      if (!Object.keys(planned).length) {
+        alert('ยังไม่มีรายการให้บันทึก');
+        return;
+      }
+
+      const now = new Date();
+      const items = loadHistoryItems();
+      const name = (els.historyName.value || '').trim() || makeHistoryName();
+      const item = {
+        id: String(Date.now()),
+        name,
+        savedAt: now.toISOString(),
+        savedAtText: `${dateKey(now)} ${timeText(now)}`,
+        planned: cloneData(planned),
+        defaultStartDate: els.defaultStartDate.value,
+        defaultStartTime: els.defaultStartTime.value
+      };
+
+      items.unshift(item);
+      saveHistoryItems(items.slice(0, 100));
+      renderHistoryOptions();
+
+      els.historySelect.value = item.id;
+      els.historyName.value = '';
+      setScanStatus(`บันทึกประวัติแล้ว: ${name}`, 'ok');
+    }
+
+    function loadSelectedHistory() {
+      const id = els.historySelect.value;
+      const item = loadHistoryItems().find((history) => history.id === id);
+
+      if (!item) {
+        setScanStatus('ยังไม่ได้เลือกประวัติ', 'bad');
+        return;
+      }
+
+      planned = cloneData(item.planned || {});
+      if (item.defaultStartDate) els.defaultStartDate.value = item.defaultStartDate;
+      if (item.defaultStartTime) els.defaultStartTime.value = item.defaultStartTime;
+
+      tasks = [];
+      renderParts();
+      renderTimeline();
+      savePlannerState();
+      switchView('selectorView');
+      setScanStatus(`โหลดประวัติแล้ว: ${item.name}`, 'ok');
+    }
+
+    function deleteSelectedHistory() {
+      const id = els.historySelect.value;
+      if (!id) return;
+
+      const items = loadHistoryItems();
+      const item = items.find((history) => history.id === id);
+
+      if (!item || !confirm(`ลบประวัติ: ${item.name} ?`)) return;
+
+      saveHistoryItems(items.filter((history) => history.id !== id));
+      renderHistoryOptions();
+      setScanStatus('ลบประวัติแล้ว', 'ok');
+    }
+
+    /* =========================================================
+       9) View / Events / Init
+       ========================================================= */
+    function switchView(id) {
+      document.querySelectorAll('.view').forEach((view) => view.classList.toggle('active', view.id === id));
+      document.querySelectorAll('.tab').forEach((button) => button.classList.toggle('active', button.dataset.view === id));
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('.tab').forEach((button) => {
+        button.addEventListener('click', () => switchView(button.dataset.view));
+      });
+
+      els.scanInput.addEventListener('keydown', (event) => {
+        if (event.key !== 'Enter') return;
+        event.preventDefault();
+
+        const value = els.scanInput.value.trim();
+        if (!value) return;
+
+        addScannedPart(value);
+        els.scanInput.value = '';
+        els.scanInput.focus();
+      });
+
+      els.partRows.addEventListener('input', (event) => {
+        const row = event.target.closest('tr[data-key]');
+        if (row) syncPartRow(row, event.target);
+      });
+
+      els.partRows.addEventListener('change', (event) => {
+        const row = event.target.closest('tr[data-key]');
+        if (row) syncPartRow(row, event.target);
+      });
+
+      els.partRows.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('remove-row')) return;
+
+        const row = event.target.closest('tr[data-key]');
+        if (!row) return;
+
+        delete planned[row.dataset.key];
+        renderParts();
+        savePlannerState();
+      });
+
+      els.masterSearch.addEventListener('input', renderMasterRows);
+      els.addMasterRow.addEventListener('click', addMasterRecord);
+      els.saveMasterRows.addEventListener('click', saveMasterRecords);
+
+      els.masterRows.addEventListener('input', (event) => {
+        const row = event.target.closest('tr[data-id]');
+        if (row) syncMasterRow(row);
+      });
+
+      els.masterRows.addEventListener('click', (event) => {
+        if (!event.target.classList.contains('delete-master')) return;
+
+        const row = event.target.closest('tr[data-id]');
+        const id = Number(row.dataset.id);
+        records = records.filter((record) => record.id !== id);
+
+        renderMasterRows();
+        saveMasterLocal();
+        setMasterStatus('ลบแถวแล้ว กดบันทึก Master เพื่อยืนยัน');
+      });
+
+      els.clearSelected.addEventListener('click', () => {
+        planned = {};
+        tasks = [];
+        renderParts();
+        renderTimeline();
+        savePlannerState();
+        els.scanInput.focus();
+      });
+
+      els.defaultStartDate.addEventListener('change', savePlannerState);
+      els.defaultStartTime.addEventListener('change', savePlannerState);
+      els.saveHistory.addEventListener('click', saveCurrentToHistory);
+      els.loadHistory.addEventListener('click', loadSelectedHistory);
+      els.deleteHistory.addEventListener('click', deleteSelectedHistory);
+      els.goTimeline.addEventListener('click', buildTimeline);
+      els.buildTimeline.addEventListener('click', buildTimeline);
+
+      els.showAll.addEventListener('click', () => {
+        els.dayFilter.value = 'all';
+        els.mcTimelineFilter.value = 'all';
+        els.timelineSearch.value = '';
+        els.showMc.querySelectorAll('input').forEach((input) => { input.checked = true; });
+        renderTimeline();
+      });
+
+      els.dayFilter.addEventListener('change', renderTimeline);
+      els.mcTimelineFilter.addEventListener('change', renderTimeline);
+      els.timelineSearch.addEventListener('input', renderTimeline);
+      els.showMc.addEventListener('change', renderTimeline);
+      els.exportDetailExcel.addEventListener('click', exportDetailsExcel);
+      els.printPage.addEventListener('click', () => window.print());
+    }
+
+    function init() {
+      loadMasterRecords();
+      loadPlannerState();
+      renderHistoryOptions();
+      renderMasterRows();
+      renderParts();
+      buildHours();
+      bindEvents();
+      els.scanInput.focus();
+    }
+
+    init();
+  </script>
 </body>
 </html>
-
-
