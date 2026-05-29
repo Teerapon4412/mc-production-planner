@@ -217,6 +217,13 @@
       text-align: right;
     }
 
+    .time-min-input {
+      width: 68px;
+      min-height: 34px;
+      padding: 6px 6px;
+      text-align: right;
+    }
+
     /* =========================================================
        4) Timeline
        ========================================================= */
@@ -1181,9 +1188,9 @@
               <option value="ซ่อมเครื่องจักร" ${plan.addInType === 'ซ่อมเครื่องจักร' ? 'selected' : ''}>ซ่อมเครื่องจักร</option>
             </select>
           </td>
-          <td><input class="add-in-min" type="number" min="0" step="1" value="${plan.addInMinutes || ''}" placeholder="0"></td>
+          <td><input class="add-in-min time-min-input" type="number" min="0" step="1" value="${plan.addInMinutes || ''}" placeholder="0"></td>
           <td><input class="loss-time-event" type="text" value="${esc(plan.lossEvent || '')}" placeholder="ระบุเหตุการณ์"></td>
-          <td><input class="loss-time-min" type="number" min="0" step="1" value="${plan.lossMinutes || ''}" placeholder="0"></td>
+          <td><input class="loss-time-min time-min-input" type="number" min="0" step="1" value="${plan.lossMinutes || ''}" placeholder="0"></td>
           <td><button class="remove-row" type="button">ลบ</button></td>
         </tr>`;
     }
