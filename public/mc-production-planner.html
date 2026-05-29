@@ -323,6 +323,12 @@
       font-weight: 700;
     }
 
+    .day-label .mc-line {
+      color: var(--navy);
+      font-size: 14px;
+      font-weight: 900;
+    }
+
     .timeline {
       min-height: 72px;
       background-color: rgba(255, 255, 255, 0.98);
@@ -1416,10 +1422,18 @@
 
     function renderTimeline() {
       const visible = filteredTasks();
-      const groups = days
+      const groups = [];
+
+      days
         .filter((day) => els.dayFilter.value === 'all' || day === els.dayFilter.value)
-        .map((day) => ({ date: day, tasks: assignLanes(visible.filter((task) => task.date === day)) }))
-        .filter((group) => group.tasks.length);
+        .forEach((day) => {
+          mcs.forEach((mc) => {
+            const rowTasks = visible.filter((task) => task.date === day && task.mc === mc);
+            if (rowTasks.length) {
+              groups.push({ date: day, mc, tasks: assignLanes(rowTasks) });
+            }
+          });
+        });
 
       els.chart.innerHTML = groups.length ? '' : '<div class="empty">ไม่พบข้อมูลตามเงื่อนไข</div>';
       groups.forEach(renderDay);
@@ -1441,7 +1455,7 @@
       row.className = 'day-row';
       label.className = 'day-label';
       label.style.minHeight = `${height}px`;
-      label.innerHTML = `<strong>${dayLabel(group.date)}</strong><span>${group.tasks.length} jobs</span><span>${total} min</span>`;
+      label.innerHTML = `<strong>${dayLabel(group.date)}</strong><span class="mc-line">${esc(group.mc)}</span><span>${group.tasks.length} jobs</span><span>${total} min</span>`;
 
       timeline.className = 'timeline';
       timeline.style.minHeight = `${height}px`;
@@ -1482,12 +1496,22 @@
     }
 
     function renderLegend(rows) {
-      els.legend.innerHTML = rows.map((task) => {
-        const style = styleFor(`${task.id}-${task.meta.mmptNo}-${task.startText}`);
+      const productionMcs = [...new Set(rows.filter((task) => task.type === 'production').map((task) => task.mc))].sort(compareMc);
+      const items = productionMcs.map((mc) => ({ key: mc, label: `${mc} Production`, style: styleFor(mc) }));
+
+      if (rows.some((task) => task.type === 'addin')) {
+        items.push({ key: 'addin', label: 'Add-in Event', style: { start: '#64748b', end: '#334155', border: '#1f2937' } });
+      }
+      if (rows.some((task) => task.type === 'loss')) {
+        items.push({ key: 'loss', label: 'Loss Time', style: { start: '#f59e0b', end: '#b45309', border: '#92400e' } });
+      }
+
+      els.legend.innerHTML = items.map((item) => {
+        const style = item.style;
         return `
           <span class="key">
             <i class="swatch" style="background:linear-gradient(180deg, ${style.start}, ${style.end}); border-color:${style.border}"></i>
-            ${esc(task.mc)} ${esc(task.meta.mmptNo)}
+            ${esc(item.label)}
           </span>`;
       }).join('');
     }
