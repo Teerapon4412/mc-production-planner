@@ -831,7 +831,7 @@
       }
     }
 
-    function loadMasterRecords() {
+    async function loadMasterRecords() {
       try {
         const local = JSON.parse(localStorage.getItem(MASTER_STORAGE_KEY) || 'null');
         if (Array.isArray(local) && local.length) {
@@ -839,6 +839,19 @@
         }
       } catch (error) {
         console.warn('Cannot load local master data:', error);
+      }
+
+      try {
+        const response = await fetch('/api/master-records');
+        if (response.ok) {
+          const remote = await response.json();
+          if (Array.isArray(remote) && remote.length) {
+            records = remote.map(normalizeRecord);
+            saveMasterLocal();
+          }
+        }
+      } catch (error) {
+        console.warn('Cannot load remote master data:', error);
       }
     }
 
@@ -908,7 +921,7 @@
       setMasterStatus('เพิ่มแถวใหม่แล้ว กรุณากรอกข้อมูลแล้วกดบันทึก Master');
     }
 
-    function saveMasterRecords() {
+    async function saveMasterRecords() {
       const valid = records
         .map(normalizeRecord)
         .filter((record) => record.mc && record.mmptNo && record.description && record.cycleTime > 0 && record.quantity > 0);
@@ -922,7 +935,18 @@
       saveMasterLocal();
       renderMasterRows();
       renderParts();
-      setMasterStatus(`บันทึก Master แล้ว: ${records.length} รายการ`, 'ok');
+
+      try {
+        const response = await fetch('/api/master-records', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ records })
+        });
+        if (!response.ok) throw new Error('Cannot save master data');
+        setMasterStatus(`บันทึก Master แล้ว: ${records.length} รายการ`, 'ok');
+      } catch (error) {
+        setMasterStatus('บันทึกไว้ในเครื่องแล้ว แต่ยังส่งขึ้น server ไม่ได้', 'bad');
+      }
     }
 
     /* =========================================================
@@ -1630,8 +1654,8 @@
       els.printPage.addEventListener('click', () => window.print());
     }
 
-    function init() {
-      loadMasterRecords();
+    async function init() {
+      await loadMasterRecords();
       loadPlannerState();
       renderHistoryOptions();
       renderMasterRows();
